@@ -68,6 +68,9 @@
             Title="Win-Tweaker"
             Grid.Row="0"
             CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/window.ico" />
+            </ui:TitleBar.Icon>
             <ui:TitleBar.Header>
                 <TextBlock
                     Margin="8,0,0,0"

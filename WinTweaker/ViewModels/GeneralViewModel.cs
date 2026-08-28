@@ -122,16 +122,58 @@ public sealed class GeneralViewModel : ViewModelBase
         ScanCurrentState();
     }
 
-    /// <summary>开机自动扫描当前状态</summary>
+    /// <summary>开机自动扫描当前状态，从注册表/服务实际状态反推所有开关</summary>
     private void ScanCurrentState()
     {
+        // 电源计划：检查注册表标记
+        _isUltimatePowerEnabled = _reg.GetDword(RegistryHive.LocalMachine,
+            @"SYSTEM\CurrentControlSet\Control\Power\PowerSettings",
+            "UltimatePerformance") == 1;
+        OnPropertyChanged(nameof(IsUltimatePowerEnabled));
+
+        // 遥测
         _isTelemetryReduced = _reg.GetDword(RegistryHive.LocalMachine,
             @"SOFTWARE\Policies\Microsoft\Windows\DataCollection", "AllowTelemetry") == 0;
         OnPropertyChanged(nameof(IsTelemetryReduced));
 
+        // 广告：检测关键标志位（SilentInstalledAppsEnabled=0 代表已优化）
+        _isAdsDisabled = _reg.GetDword(RegistryHive.CurrentUser,
+            @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+            "SilentInstalledAppsEnabled") == 0;
+        OnPropertyChanged(nameof(IsAdsDisabled));
+
+        // 冗余服务：所有目标服务均为 Disabled 视为已优化
+        _isServicesOptimized = CheckAllServicesDisabled(RedundantServices);
+        OnPropertyChanged(nameof(IsServicesOptimized));
+
+        // 后台运行
         _isBackgroundDisabled = _reg.GetDword(RegistryHive.CurrentUser,
             @"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications", "GlobalUserDisabled") == 1;
         OnPropertyChanged(nameof(IsBackgroundDisabled));
+
+        // 休眠
+        _isHibernationDisabled = _reg.GetDword(RegistryHive.LocalMachine,
+            @"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabled") == 0;
+        OnPropertyChanged(nameof(IsHibernationDisabled));
+
+        // 资源管理器：HideFileExt=0 表示已优化（强制显示扩展名）
+        _isExplorerOptimized = _reg.GetDword(RegistryHive.CurrentUser,
+            @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "HideFileExt") == 0;
+        OnPropertyChanged(nameof(IsExplorerOptimized));
+    }
+
+    /// <summary>检查指定服务是否全部处于 Disabled 状态</summary>
+    private bool CheckAllServicesDisabled(string[] serviceNames)
+    {
+        foreach (var name in serviceNames)
+        {
+            if (!_svc.ServiceExists(name))
+                continue;
+            var startType = _svc.GetStartType(name);
+            if (startType != System.ServiceProcess.ServiceStartMode.Disabled)
+                return false;
+        }
+        return true;
     }
 
     #region 电源计划

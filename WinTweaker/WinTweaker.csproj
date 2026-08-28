@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AssemblyName>WinTweaker</AssemblyName>
     <RootNamespace>WinTweaker</RootNamespace>
     <Version>1.0.0</Version>
@@ -37,6 +38,11 @@
   <ItemGroup>
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.11" />
     <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\window.ico" />
   </ItemGroup>
 
 </Project>

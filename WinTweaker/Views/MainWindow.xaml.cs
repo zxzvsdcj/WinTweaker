@@ -14,6 +14,9 @@ public partial class MainWindow : FluentWindow
         InitializeComponent();
         DataContext = new MainViewModel();
 
+        Icon = new System.Windows.Media.Imaging.BitmapImage(
+            new Uri("pack://application:,,,/Assets/window.ico", UriKind.Absolute));
+
         var sysInfo = SystemInfoService.Instance.Current;
         WindowBackdropType = sysInfo.SupportsMica
             ? WindowBackdropType.Mica
@@ -35,8 +38,16 @@ public partial class MainWindow : FluentWindow
 
 internal sealed class SimplePageProvider : INavigationViewPageProvider
 {
+    private readonly Dictionary<Type, object> _cache = new();
+
     public object? GetPage(Type pageType)
     {
-        return Activator.CreateInstance(pageType);
+        if (!_cache.TryGetValue(pageType, out var page))
+        {
+            page = Activator.CreateInstance(pageType);
+            if (page != null)
+                _cache[pageType] = page;
+        }
+        return page;
     }
 }
