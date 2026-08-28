@@ -1,0 +1,85 @@
+<Page
+    x:Class="WinTweaker.Views.DangerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="高危操作">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Margin="0,16,0,16">
+
+            <!-- 警告标头 -->
+            <ui:InfoBar
+                IsOpen="True"
+                IsClosable="False"
+                Severity="Error"
+                Title="高危操作警告"
+                Message="以下操作可能影响系统安全性，请确保了解风险后再操作。所有更改均可回滚。" />
+
+            <!-- UAC -->
+            <Border BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="0">
+                <ui:CardControl>
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Warning24" Foreground="#E74C3C" />
+                                <TextBlock FontWeight="Medium" Text="关闭 UAC 用户账户控制" />
+                            </StackPanel>
+                            <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                       Text="需要重启生效，降低系统安全屏障" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:ToggleSwitch IsChecked="{Binding IsUacDisabled, Mode=TwoWay}" />
+                </ui:CardControl>
+            </Border>
+
+            <!-- 防火墙 -->
+            <Border BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="0">
+                <ui:CardControl>
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Warning24" Foreground="#E74C3C" />
+                                <TextBlock FontWeight="Medium" Text="完全关闭防火墙" />
+                            </StackPanel>
+                            <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                       Text="域/专用/公用三个配置文件全部关闭" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:ToggleSwitch IsChecked="{Binding IsFirewallDisabled, Mode=TwoWay}" />
+                </ui:CardControl>
+            </Border>
+
+            <!-- Defender -->
+            <Border BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="0">
+                <ui:CardControl>
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Warning24" Foreground="#E74C3C" />
+                                <TextBlock FontWeight="Medium" Text="压制 Defender 实时防护" />
+                            </StackPanel>
+                            <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                       Text="{Binding DefenderWarningText}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:ToggleSwitch IsChecked="{Binding IsDefenderSuppressed, Mode=TwoWay}" />
+                </ui:CardControl>
+            </Border>
+
+            <!-- 一键回滚 -->
+            <ui:CardControl Margin="0,16,0,0">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" Text="一键恢复全部高危设置" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="恢复 UAC、防火墙、Defender 到操作前状态" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:Button Content="恢复全部" Command="{Binding RollbackAllCommand}"
+                           Appearance="Danger" Icon="{ui:SymbolIcon ArrowReset24}" />
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

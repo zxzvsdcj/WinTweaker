@@ -1,0 +1,26 @@
+## .NET
+bin/
+obj/
+publish-light/
+publish-full/
+
+## IDE
+.vs/
+*.user
+*.suo
+*.userprefs
+
+## Build outputs
+*.dll
+*.exe
+*.pdb
+
+## NuGet
+packages/
+
+## OS files
+Thumbs.db
+.DS_Store
+
+## Crash logs
+crash.log

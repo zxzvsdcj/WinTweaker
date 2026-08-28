@@ -1,0 +1,110 @@
+<Page
+    x:Class="WinTweaker.Views.GeneralPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:WinTweaker.ViewModels"
+    Title="常规优化">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Margin="0,16,0,16">
+
+            <!-- 电源计划 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="卓越性能电源计划" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="添加隐藏的 Ultimate Performance 电源计划" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsUltimatePowerEnabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 遥测降级 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="系统遥测降级" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="将诊断数据级别设为基础级，减少后台上传" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsTelemetryReduced, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 关闭广告 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="关闭系统广告和推荐" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="禁用锁屏/开始菜单/通知/同步等广告推送" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsAdsDisabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 裁剪冗余服务 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="裁剪冗余服务" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="禁用 DiagTrack、Xbox 全套、SysMain 等" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsServicesOptimized, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 禁止后台运行 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="全局禁止应用后台运行" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="阻止 UWP/商店应用在后台消耗资源" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsBackgroundDisabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 关闭休眠 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="关闭休眠释放空间" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="删除 hiberfil.sys 释放 C 盘空间（保留睡眠）" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsHibernationDisabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 资源管理器优化 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="资源管理器优化" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="关闭云广告、强制显示文件扩展名" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsExplorerOptimized, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- WSL2 配置 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="WSL2 高性能配置" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="自动生成优化的 .wslconfig 配置文件" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:Button Content="生成配置" Command="{Binding GenerateWslConfigCommand}" />
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

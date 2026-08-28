@@ -1,0 +1,42 @@
+using System.Windows;
+using Wpf.Ui.Abstractions;
+using Wpf.Ui.Appearance;
+using Wpf.Ui.Controls;
+using WinTweaker.Services;
+using WinTweaker.ViewModels;
+
+namespace WinTweaker.Views;
+
+public partial class MainWindow : FluentWindow
+{
+    public MainWindow()
+    {
+        InitializeComponent();
+        DataContext = new MainViewModel();
+
+        var sysInfo = SystemInfoService.Instance.Current;
+        WindowBackdropType = sysInfo.SupportsMica
+            ? WindowBackdropType.Mica
+            : WindowBackdropType.Acrylic;
+
+        SystemThemeWatcher.Watch(this, WindowBackdropType);
+
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        RootNavigation.SetPageProviderService(new SimplePageProvider());
+
+        // 默认导航到"常规优化"页面，避免右侧空白
+        RootNavigation.Navigate(typeof(GeneralPage));
+    }
+}
+
+internal sealed class SimplePageProvider : INavigationViewPageProvider
+{
+    public object? GetPage(Type pageType)
+    {
+        return Activator.CreateInstance(pageType);
+    }
+}

@@ -1,0 +1,60 @@
+<Page
+    x:Class="WinTweaker.Views.Win11Page"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Win11 专属">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Margin="0,16,0,16">
+
+            <!-- 版本提示 -->
+            <ui:InfoBar
+                x:Name="VersionInfoBar"
+                IsOpen="{Binding ShowWin10Warning}"
+                Severity="Informational"
+                Title="系统版本提示"
+                Message="以下功能仅适用于 Windows 11，当前系统不支持的功能已自动置灰" />
+
+            <!-- 禁用 Copilot -->
+            <ui:CardControl IsEnabled="{Binding CanDisableCopilot}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用 Copilot" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding CopilotTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsCopilotDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableCopilot}" />
+            </ui:CardControl>
+
+            <!-- 禁用 Widgets -->
+            <ui:CardControl IsEnabled="{Binding CanDisableWidgets}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用 Widgets 小组件" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding WidgetsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsWidgetsDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableWidgets}" />
+            </ui:CardControl>
+
+            <!-- 关闭任务栏 Bing -->
+            <ui:CardControl IsEnabled="{Binding CanDisableTaskbarBing}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="关闭任务栏 Bing 搜索" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding TaskbarBingTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsTaskbarBingDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableTaskbarBing}" />
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
