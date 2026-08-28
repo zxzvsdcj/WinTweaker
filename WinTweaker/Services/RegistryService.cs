@@ -136,4 +136,68 @@ public sealed class RegistryService
             return false;
         }
     }
+
+    /// <summary>
+    /// 设置 DWORD 值（指定注册表视图，用于 Google Update 等需要 32 位视图的场景）
+    /// </summary>
+    public bool SetDword(RegistryHive hive, string subKey, string valueName, int value, RegistryView view)
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(hive, view);
+            using var key = baseKey.CreateSubKey(subKey, writable: true);
+            if (key == null)
+            {
+                _log.Error($"无法创建注册表路径：{hive}\\{subKey} (View={view})");
+                return false;
+            }
+            key.SetValue(valueName, value, RegistryValueKind.DWord);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"写入注册表失败 [{subKey}\\{valueName}] (View={view})：{ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 读取 DWORD 值（指定注册表视图）
+    /// </summary>
+    public int? GetDword(RegistryHive hive, string subKey, string valueName, RegistryView view)
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(hive, view);
+            using var key = baseKey.OpenSubKey(subKey);
+            var value = key?.GetValue(valueName);
+            if (value is int intVal) return intVal;
+            if (value != null && int.TryParse(value.ToString(), out int parsed)) return parsed;
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 删除注册表值（指定注册表视图）
+    /// </summary>
+    public bool DeleteValue(RegistryHive hive, string subKey, string valueName, RegistryView view)
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(hive, view);
+            using var key = baseKey.OpenSubKey(subKey, writable: true);
+            if (key == null) return true;
+            key.DeleteValue(valueName, throwOnMissingValue: false);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"删除注册表值失败 [{subKey}\\{valueName}] (View={view})：{ex.Message}");
+            return false;
+        }
+    }
 }

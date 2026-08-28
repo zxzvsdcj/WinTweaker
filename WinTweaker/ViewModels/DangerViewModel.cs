@@ -6,18 +6,20 @@ using WinTweaker.Services;
 namespace WinTweaker.ViewModels;
 
 /// <summary>
-/// 高危操作 ViewModel —— UAC/防火墙/Defender
+/// 高危操作 ViewModel —— UAC/防火墙/Defender/Windows Update
 /// 含二次确认和自动版本适配提示
 /// </summary>
 public sealed class DangerViewModel : ViewModelBase
 {
     private readonly SystemSecurityService _security = SystemSecurityService.Instance;
+    private readonly UpdateService _update = UpdateService.Instance;
     private readonly LogService _log = LogService.Instance;
     private readonly SystemCapabilities _caps;
 
     private bool _isUacDisabled;
     private bool _isFirewallDisabled;
     private bool _isDefenderSuppressed;
+    private bool _isWindowsUpdateDisabled;
 
     public string DefenderWarningText { get; }
 
@@ -87,6 +89,28 @@ public sealed class DangerViewModel : ViewModelBase
         }
     }
 
+    public bool IsWindowsUpdateDisabled
+    {
+        get => _isWindowsUpdateDisabled;
+        set
+        {
+            if (SetProperty(ref _isWindowsUpdateDisabled, value))
+            {
+                if (value)
+                {
+                    if (ConfirmDangerAction("禁用 Windows Update 将阻止系统接收安全补丁和功能更新，确定继续？"))
+                        _update.DisableWindowsUpdate();
+                    else
+                        SetProperty(ref _isWindowsUpdateDisabled, false);
+                }
+                else
+                {
+                    _update.RestoreWindowsUpdate();
+                }
+            }
+        }
+    }
+
     public ICommand RollbackAllCommand { get; }
 
     public DangerViewModel()
@@ -111,6 +135,9 @@ public sealed class DangerViewModel : ViewModelBase
 
         _isDefenderSuppressed = !_security.IsDefenderRealtimeEnabled();
         OnPropertyChanged(nameof(IsDefenderSuppressed));
+
+        _isWindowsUpdateDisabled = _update.IsWindowsUpdateDisabled();
+        OnPropertyChanged(nameof(IsWindowsUpdateDisabled));
     }
 
     private void RollbackAll()
@@ -118,14 +145,17 @@ public sealed class DangerViewModel : ViewModelBase
         _security.EnableUac();
         _security.EnableFirewall();
         _security.RestoreDefender();
+        _update.RestoreWindowsUpdate();
 
         _isUacDisabled = false;
         _isFirewallDisabled = false;
         _isDefenderSuppressed = false;
+        _isWindowsUpdateDisabled = false;
 
         OnPropertyChanged(nameof(IsUacDisabled));
         OnPropertyChanged(nameof(IsFirewallDisabled));
         OnPropertyChanged(nameof(IsDefenderSuppressed));
+        OnPropertyChanged(nameof(IsWindowsUpdateDisabled));
 
         _log.Success("[高危回滚] 已恢复全部安全设置");
     }

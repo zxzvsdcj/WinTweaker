@@ -40,6 +40,11 @@
                         <ui:SymbolIcon Symbol="Wrench24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="更新管理" TargetPageType="{x:Type local:UpdatePage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="ArrowSync24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Win11 专属" TargetPageType="{x:Type local:Win11Page}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Desktop24" />

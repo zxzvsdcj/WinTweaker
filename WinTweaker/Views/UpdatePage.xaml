@@ -1,0 +1,45 @@
+<Page
+    x:Class="WinTweaker.Views.UpdatePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="更新管理">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Margin="0,16,0,16">
+
+            <!-- 说明 -->
+            <ui:InfoBar
+                IsOpen="True"
+                IsClosable="False"
+                Severity="Informational"
+                Title="浏览器更新管理"
+                Message="禁用浏览器自动更新后，需要手动检查并安装新版本。禁用后浏览器会显示「更新由组织管理」。" />
+
+            <!-- Edge 自动更新 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁止 Edge 自动更新" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="通过策略注册表和服务禁用阻止 Microsoft Edge 自动更新" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsEdgeUpdateDisabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- Chrome 自动更新 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁止 Chrome 自动更新" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="通过 Google Update 策略注册表和服务禁用阻止 Chrome 自动更新" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsChromeUpdateDisabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -67,6 +67,23 @@
                 </ui:CardControl>
             </Border>
 
+            <!-- Windows Update -->
+            <Border BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="0">
+                <ui:CardControl>
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ui:SymbolIcon Symbol="Warning24" Foreground="#E74C3C" />
+                                <TextBlock FontWeight="Medium" Text="禁止 Windows 自动更新" />
+                            </StackPanel>
+                            <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                       Text="禁用 Windows Update 服务和策略，阻止系统自动下载安装更新" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:ToggleSwitch IsChecked="{Binding IsWindowsUpdateDisabled, Mode=TwoWay}" />
+                </ui:CardControl>
+            </Border>
+
             <!-- 一键回滚 -->
             <ui:CardControl Margin="0,16,0,0">
                 <ui:CardControl.Header>
