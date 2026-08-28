@@ -30,3 +30,5 @@ docs/
 tools/
 build.ps1
 test.ps1
+test-publish.ps1
+.cunzhi-memory/
