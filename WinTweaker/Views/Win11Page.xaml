@@ -16,6 +16,97 @@
                 Title="系统版本提示"
                 Message="以下功能仅适用于 Windows 11，当前系统不支持的功能已自动置灰" />
 
+            <!-- 经典右键菜单 -->
+            <ui:CardControl IsEnabled="{Binding CanClassicContextMenu}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="经典右键菜单" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding ClassicContextMenuTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsClassicContextMenuEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanClassicContextMenu}" />
+            </ui:CardControl>
+
+            <!-- 任务栏左对齐 -->
+            <ui:CardControl IsEnabled="{Binding CanTaskbarLeftAlign}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="任务栏左对齐" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding TaskbarLeftAlignTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsTaskbarLeftAligned, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanTaskbarLeftAlign}" />
+            </ui:CardControl>
+
+            <!-- 任务栏结束任务 -->
+            <ui:CardControl IsEnabled="{Binding CanTaskbarEndTask}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="任务栏结束任务" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding TaskbarEndTaskTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsTaskbarEndTaskEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanTaskbarEndTask}" />
+            </ui:CardControl>
+
+            <!-- 隐藏 Gallery -->
+            <ui:CardControl IsEnabled="{Binding CanHideExplorerGallery}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="隐藏资源管理器 Gallery" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding HideExplorerGalleryTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsExplorerGalleryHidden, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanHideExplorerGallery}" />
+            </ui:CardControl>
+
+            <!-- 隐藏 Home -->
+            <ui:CardControl IsEnabled="{Binding CanHideExplorerHome}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="隐藏资源管理器 Home" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding HideExplorerHomeTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsExplorerHomeHidden, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanHideExplorerHome}" />
+            </ui:CardControl>
+
+            <!-- 禁用 Snap 悬停提示 -->
+            <ui:CardControl IsEnabled="{Binding CanDisableSnapFlyout}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用 Snap Layouts 悬停提示" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableSnapFlyoutTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsSnapFlyoutDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableSnapFlyout}" />
+            </ui:CardControl>
+
+            <!-- 关闭开始菜单推荐广告 -->
+            <ui:CardControl IsEnabled="{Binding CanDisableStartRecommendations}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="关闭开始菜单推荐广告" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableStartRecommendationsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsStartRecommendationsDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableStartRecommendations}" />
+            </ui:CardControl>
+
             <!-- 禁用 Copilot -->
             <ui:CardControl IsEnabled="{Binding CanDisableCopilot}">
                 <ui:CardControl.Header>

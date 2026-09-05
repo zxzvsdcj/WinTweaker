@@ -200,4 +200,66 @@ public sealed class RegistryService
             return false;
         }
     }
+
+    /// <summary>
+    /// 检查注册表子键是否存在
+    /// </summary>
+    public bool KeyExists(RegistryHive hive, string subKey)
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+            using var key = baseKey.OpenSubKey(subKey);
+            return key != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 创建子键并将 (Default) 设为空字符串（等价于 reg add ... /ve）
+    /// </summary>
+    public bool SetEmptyDefault(RegistryHive hive, string subKey)
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+            using var key = baseKey.CreateSubKey(subKey, writable: true);
+            if (key == null)
+            {
+                _log.Error($"无法创建注册表路径：{hive}\\{subKey}");
+                return false;
+            }
+            key.SetValue(string.Empty, string.Empty, RegistryValueKind.String);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"写入空默认值失败 [{subKey}]：{ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 递归删除注册表子键树（键不存在时视为成功）
+    /// </summary>
+    public bool DeleteSubKeyTree(RegistryHive hive, string subKey)
+    {
+        try
+        {
+            using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+            using var existing = baseKey.OpenSubKey(subKey);
+            if (existing == null) return true;
+
+            baseKey.DeleteSubKeyTree(subKey, throwOnMissingSubKey: false);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"删除注册表键失败 [{subKey}]：{ex.Message}");
+            return false;
+        }
+    }
 }

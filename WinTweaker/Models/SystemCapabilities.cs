@@ -56,6 +56,27 @@ public sealed class SystemCapabilities
     /// <summary>关闭任务栏 Bing 搜索（仅Win11）</summary>
     public bool CanDisableTaskbarBing => _sysInfo.IsWindows11;
 
+    /// <summary>经典右键菜单（仅Win11）</summary>
+    public bool CanClassicContextMenu => _sysInfo.IsWindows11;
+
+    /// <summary>任务栏左对齐（仅Win11）</summary>
+    public bool CanTaskbarLeftAlign => _sysInfo.IsWindows11;
+
+    /// <summary>任务栏结束任务（Win11 23H2+，Build &gt;= 22631）</summary>
+    public bool CanTaskbarEndTask => _sysInfo.IsWindows11 && _sysInfo.BuildNumber >= 22631;
+
+    /// <summary>隐藏资源管理器 Gallery（仅Win11）</summary>
+    public bool CanHideExplorerGallery => _sysInfo.IsWindows11;
+
+    /// <summary>禁用 Snap Layouts 悬停提示（仅Win11）</summary>
+    public bool CanDisableSnapFlyout => _sysInfo.IsWindows11;
+
+    /// <summary>隐藏资源管理器 Home（仅Win11）</summary>
+    public bool CanHideExplorerHome => _sysInfo.IsWindows11;
+
+    /// <summary>关闭开始菜单推荐广告（仅Win11）</summary>
+    public bool CanDisableStartRecommendations => _sysInfo.IsWindows11;
+
     // ===== 高危操作 =====
     /// <summary>关闭 UAC（全版本可用）</summary>
     public bool CanDisableUac => true;
@@ -93,6 +114,15 @@ public sealed class SystemCapabilities
             "Copilot" => "此功能仅适用于 Windows 11",
             "Widgets" => "此功能仅适用于 Windows 11",
             "TaskbarBing" => "此功能仅适用于 Windows 11",
+            "ClassicContextMenu" => "此功能仅适用于 Windows 11",
+            "TaskbarLeftAlign" => "此功能仅适用于 Windows 11",
+            "TaskbarEndTask" => _sysInfo.IsWindows11
+                ? "此功能需要 Windows 11 23H2 及以上"
+                : "此功能仅适用于 Windows 11",
+            "HideExplorerGallery" => "此功能仅适用于 Windows 11",
+            "DisableSnapFlyout" => "此功能仅适用于 Windows 11",
+            "HideExplorerHome" => "此功能仅适用于 Windows 11",
+            "DisableStartRecommendations" => "此功能仅适用于 Windows 11",
             _ => "当前系统版本不支持此功能"
         };
     }
