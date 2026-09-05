@@ -107,6 +107,45 @@
                                  IsEnabled="{Binding CanDisableStartRecommendations}" />
             </ui:CardControl>
 
+            <!-- 文件夹悬停详细信息 -->
+            <ui:CardControl IsEnabled="{Binding CanFolderContentsInfoTip}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="文件夹悬停详细信息" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding FolderContentsInfoTipTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsFolderContentsInfoTipEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanFolderContentsInfoTip}" />
+            </ui:CardControl>
+
+            <!-- 禁用搜索高亮 -->
+            <ui:CardControl IsEnabled="{Binding CanDisableSearchHighlights}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用搜索高亮" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableSearchHighlightsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsSearchHighlightsDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableSearchHighlights}" />
+            </ui:CardControl>
+
+            <!-- 任务栏显示秒 -->
+            <ui:CardControl IsEnabled="{Binding CanShowTaskbarSeconds}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="任务栏时钟显示秒" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding ShowTaskbarSecondsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsTaskbarSecondsEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanShowTaskbarSeconds}" />
+            </ui:CardControl>
+
             <!-- 禁用 Copilot -->
             <ui:CardControl IsEnabled="{Binding CanDisableCopilot}">
                 <ui:CardControl.Header>

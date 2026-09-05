@@ -22,6 +22,8 @@ public sealed class Win11ViewModel : ViewModelBase
         @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
     private const string TaskbarDeveloperKey =
         @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings";
+    private const string SearchHighlightsPolicyKey =
+        @"Software\Policies\Microsoft\Windows\Windows Search";
 
     private readonly RegistryService _reg = RegistryService.Instance;
     private readonly ExplorerService _explorer = ExplorerService.Instance;
@@ -38,6 +40,9 @@ public sealed class Win11ViewModel : ViewModelBase
     private bool _isSnapFlyoutDisabled;
     private bool _isExplorerHomeHidden;
     private bool _isStartRecommendationsDisabled;
+    private bool _isFolderContentsInfoTipEnabled;
+    private bool _isSearchHighlightsDisabled;
+    private bool _isTaskbarSecondsEnabled;
 
     public bool CanDisableCopilot => _caps.CanDisableCopilot;
     public bool CanDisableWidgets => _caps.CanDisableWidgets;
@@ -49,6 +54,9 @@ public sealed class Win11ViewModel : ViewModelBase
     public bool CanDisableSnapFlyout => _caps.CanDisableSnapFlyout;
     public bool CanHideExplorerHome => _caps.CanHideExplorerHome;
     public bool CanDisableStartRecommendations => _caps.CanDisableStartRecommendations;
+    public bool CanFolderContentsInfoTip => _caps.CanFolderContentsInfoTip;
+    public bool CanDisableSearchHighlights => _caps.CanDisableSearchHighlights;
+    public bool CanShowTaskbarSeconds => _caps.CanShowTaskbarSeconds;
 
     /// <summary>Win10 用户看到的提示</summary>
     public bool ShowWin10Warning => !SystemInfoService.Instance.Current.IsWindows11;
@@ -91,6 +99,18 @@ public sealed class Win11ViewModel : ViewModelBase
 
     public string DisableStartRecommendationsTooltip => CanDisableStartRecommendations
         ? "关闭开始菜单「推荐」区域中的应用/技巧广告"
+        : "此功能仅适用于 Windows 11";
+
+    public string FolderContentsInfoTipTooltip => CanFolderContentsInfoTip
+        ? "鼠标悬停文件夹时显示大小与内容摘要"
+        : "此功能仅适用于 Windows 11";
+
+    public string DisableSearchHighlightsTooltip => CanDisableSearchHighlights
+        ? "关闭任务栏搜索框中的搜索高亮动态内容"
+        : "此功能仅适用于 Windows 11";
+
+    public string ShowTaskbarSecondsTooltip => CanShowTaskbarSeconds
+        ? "任务栏时钟显示秒数"
         : "此功能仅适用于 Windows 11";
 
     public bool IsCopilotDisabled
@@ -233,6 +253,48 @@ public sealed class Win11ViewModel : ViewModelBase
         }
     }
 
+    public bool IsFolderContentsInfoTipEnabled
+    {
+        get => _isFolderContentsInfoTipEnabled;
+        set
+        {
+            if (!CanFolderContentsInfoTip) return;
+            if (SetProperty(ref _isFolderContentsInfoTipEnabled, value))
+            {
+                if (value) EnableFolderContentsInfoTip();
+                else DisableFolderContentsInfoTip();
+            }
+        }
+    }
+
+    public bool IsSearchHighlightsDisabled
+    {
+        get => _isSearchHighlightsDisabled;
+        set
+        {
+            if (!CanDisableSearchHighlights) return;
+            if (SetProperty(ref _isSearchHighlightsDisabled, value))
+            {
+                if (value) DisableSearchHighlights();
+                else EnableSearchHighlights();
+            }
+        }
+    }
+
+    public bool IsTaskbarSecondsEnabled
+    {
+        get => _isTaskbarSecondsEnabled;
+        set
+        {
+            if (!CanShowTaskbarSeconds) return;
+            if (SetProperty(ref _isTaskbarSecondsEnabled, value))
+            {
+                if (value) EnableTaskbarSeconds();
+                else DisableTaskbarSeconds();
+            }
+        }
+    }
+
     public Win11ViewModel()
     {
         _caps = new SystemCapabilities(SystemInfoService.Instance.Current);
@@ -306,6 +368,24 @@ public sealed class Win11ViewModel : ViewModelBase
         {
             _isStartRecommendationsDisabled = _reg.GetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "Start_IrisRecommendations") == 0;
             OnPropertyChanged(nameof(IsStartRecommendationsDisabled));
+        }
+
+        if (CanFolderContentsInfoTip)
+        {
+            _isFolderContentsInfoTipEnabled = _reg.GetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "FolderContentsInfoTip") == 1;
+            OnPropertyChanged(nameof(IsFolderContentsInfoTipEnabled));
+        }
+
+        if (CanDisableSearchHighlights)
+        {
+            _isSearchHighlightsDisabled = _reg.GetDword(RegistryHive.CurrentUser, SearchHighlightsPolicyKey, "EnableDynamicContentInWSB") == 0;
+            OnPropertyChanged(nameof(IsSearchHighlightsDisabled));
+        }
+
+        if (CanShowTaskbarSeconds)
+        {
+            _isTaskbarSecondsEnabled = _reg.GetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "ShowSecondsInSystemClock") == 1;
+            OnPropertyChanged(nameof(IsTaskbarSecondsEnabled));
         }
     }
 
@@ -451,5 +531,46 @@ public sealed class Win11ViewModel : ViewModelBase
     {
         _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "Start_IrisRecommendations", 1);
         _log.Success("[开始菜单] 已恢复推荐区域广告");
+    }
+
+    private void EnableFolderContentsInfoTip()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "FolderContentsInfoTip", 1);
+        _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "ShowInfoTip", 1);
+        _log.Success("[文件夹提示] 已启用悬停详细信息");
+    }
+
+    private void DisableFolderContentsInfoTip()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "FolderContentsInfoTip", 0);
+        _log.Success("[文件夹提示] 已关闭悬停详细信息");
+    }
+
+    private void DisableSearchHighlights()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, SearchHighlightsPolicyKey, "EnableDynamicContentInWSB", 0);
+        _log.Success("[搜索高亮] 已关闭任务栏搜索高亮");
+        _explorer.Restart();
+    }
+
+    private void EnableSearchHighlights()
+    {
+        _reg.DeleteValue(RegistryHive.CurrentUser, SearchHighlightsPolicyKey, "EnableDynamicContentInWSB");
+        _log.Success("[搜索高亮] 已恢复任务栏搜索高亮");
+        _explorer.Restart();
+    }
+
+    private void EnableTaskbarSeconds()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "ShowSecondsInSystemClock", 1);
+        _log.Success("[任务栏时钟] 已显示秒数");
+        _explorer.Restart();
+    }
+
+    private void DisableTaskbarSeconds()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "ShowSecondsInSystemClock", 0);
+        _log.Success("[任务栏时钟] 已隐藏秒数");
+        _explorer.Restart();
     }
 }

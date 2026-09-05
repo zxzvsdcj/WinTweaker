@@ -77,6 +77,15 @@ public sealed class SystemCapabilities
     /// <summary>关闭开始菜单推荐广告（仅Win11）</summary>
     public bool CanDisableStartRecommendations => _sysInfo.IsWindows11;
 
+    /// <summary>文件夹悬停显示详细信息（仅Win11）</summary>
+    public bool CanFolderContentsInfoTip => _sysInfo.IsWindows11;
+
+    /// <summary>禁用搜索高亮（仅Win11）</summary>
+    public bool CanDisableSearchHighlights => _sysInfo.IsWindows11;
+
+    /// <summary>任务栏时钟显示秒（仅Win11）</summary>
+    public bool CanShowTaskbarSeconds => _sysInfo.IsWindows11;
+
     // ===== 高危操作 =====
     /// <summary>关闭 UAC（全版本可用）</summary>
     public bool CanDisableUac => true;
@@ -123,6 +132,9 @@ public sealed class SystemCapabilities
             "DisableSnapFlyout" => "此功能仅适用于 Windows 11",
             "HideExplorerHome" => "此功能仅适用于 Windows 11",
             "DisableStartRecommendations" => "此功能仅适用于 Windows 11",
+            "FolderContentsInfoTip" => "此功能仅适用于 Windows 11",
+            "DisableSearchHighlights" => "此功能仅适用于 Windows 11",
+            "ShowTaskbarSeconds" => "此功能仅适用于 Windows 11",
             _ => "当前系统版本不支持此功能"
         };
     }
