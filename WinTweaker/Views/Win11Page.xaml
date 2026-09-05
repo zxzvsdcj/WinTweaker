@@ -146,6 +146,58 @@
                                  IsEnabled="{Binding CanShowTaskbarSeconds}" />
             </ui:CardControl>
 
+            <!-- 隐藏 OneDrive -->
+            <ui:CardControl IsEnabled="{Binding CanHideOneDriveNav}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="隐藏 OneDrive 导航栏" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding HideOneDriveNavTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsOneDriveNavHidden, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanHideOneDriveNav}" />
+            </ui:CardControl>
+
+            <!-- 禁用锁屏 Spotlight -->
+            <ui:CardControl IsEnabled="{Binding CanDisableLockScreenSpotlight}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用锁屏 Spotlight" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableLockScreenSpotlightTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsLockScreenSpotlightDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableLockScreenSpotlight}" />
+            </ui:CardControl>
+
+            <!-- 完整路径 -->
+            <ui:CardControl IsEnabled="{Binding CanShowFullPathInTitle}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="标题栏显示完整路径" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding ShowFullPathInTitleTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsFullPathInTitleEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanShowFullPathInTitle}" />
+            </ui:CardControl>
+
+            <!-- 长路径 -->
+            <ui:CardControl IsEnabled="{Binding CanEnableLongPaths}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="启用 Win32 长路径" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding EnableLongPathsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsLongPathsEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanEnableLongPaths}" />
+            </ui:CardControl>
+
             <!-- 禁用 Copilot -->
             <ui:CardControl IsEnabled="{Binding CanDisableCopilot}">
                 <ui:CardControl.Header>

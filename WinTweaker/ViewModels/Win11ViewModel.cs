@@ -24,6 +24,14 @@ public sealed class Win11ViewModel : ViewModelBase
         @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings";
     private const string SearchHighlightsPolicyKey =
         @"Software\Policies\Microsoft\Windows\Windows Search";
+    private const string OneDriveKey =
+        @"Software\Classes\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}";
+    private const string ContentDeliveryKey =
+        @"Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager";
+    private const string CabinetStateKey =
+        @"Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState";
+    private const string FileSystemKey =
+        @"SYSTEM\CurrentControlSet\Control\FileSystem";
 
     private readonly RegistryService _reg = RegistryService.Instance;
     private readonly ExplorerService _explorer = ExplorerService.Instance;
@@ -43,6 +51,10 @@ public sealed class Win11ViewModel : ViewModelBase
     private bool _isFolderContentsInfoTipEnabled;
     private bool _isSearchHighlightsDisabled;
     private bool _isTaskbarSecondsEnabled;
+    private bool _isOneDriveNavHidden;
+    private bool _isLockScreenSpotlightDisabled;
+    private bool _isFullPathInTitleEnabled;
+    private bool _isLongPathsEnabled;
 
     public bool CanDisableCopilot => _caps.CanDisableCopilot;
     public bool CanDisableWidgets => _caps.CanDisableWidgets;
@@ -57,6 +69,10 @@ public sealed class Win11ViewModel : ViewModelBase
     public bool CanFolderContentsInfoTip => _caps.CanFolderContentsInfoTip;
     public bool CanDisableSearchHighlights => _caps.CanDisableSearchHighlights;
     public bool CanShowTaskbarSeconds => _caps.CanShowTaskbarSeconds;
+    public bool CanHideOneDriveNav => _caps.CanHideOneDriveNav;
+    public bool CanDisableLockScreenSpotlight => _caps.CanDisableLockScreenSpotlight;
+    public bool CanShowFullPathInTitle => _caps.CanShowFullPathInTitle;
+    public bool CanEnableLongPaths => _caps.CanEnableLongPaths;
 
     /// <summary>Win10 用户看到的提示</summary>
     public bool ShowWin10Warning => !SystemInfoService.Instance.Current.IsWindows11;
@@ -112,6 +128,22 @@ public sealed class Win11ViewModel : ViewModelBase
     public string ShowTaskbarSecondsTooltip => CanShowTaskbarSeconds
         ? "任务栏时钟显示秒数"
         : "此功能仅适用于 Windows 11";
+
+    public string HideOneDriveNavTooltip => CanHideOneDriveNav
+        ? "从资源管理器导航栏隐藏 OneDrive（不卸载、不停同步）"
+        : "此功能仅适用于 Windows 11";
+
+    public string DisableLockScreenSpotlightTooltip => CanDisableLockScreenSpotlight
+        ? "关闭锁屏 Windows Spotlight 壁纸与趣味提示"
+        : "此功能仅适用于 Windows 11";
+
+    public string ShowFullPathInTitleTooltip => CanShowFullPathInTitle
+        ? "资源管理器标题栏显示完整文件夹路径"
+        : _caps.GetUnavailableReason("ShowFullPathInTitle");
+
+    public string EnableLongPathsTooltip => CanEnableLongPaths
+        ? "启用 Win32 长路径（突破 MAX_PATH 260 限制，利于开发工具链）"
+        : _caps.GetUnavailableReason("EnableLongPaths");
 
     public bool IsCopilotDisabled
     {
@@ -295,6 +327,62 @@ public sealed class Win11ViewModel : ViewModelBase
         }
     }
 
+    public bool IsOneDriveNavHidden
+    {
+        get => _isOneDriveNavHidden;
+        set
+        {
+            if (!CanHideOneDriveNav) return;
+            if (SetProperty(ref _isOneDriveNavHidden, value))
+            {
+                if (value) HideOneDriveNav();
+                else ShowOneDriveNav();
+            }
+        }
+    }
+
+    public bool IsLockScreenSpotlightDisabled
+    {
+        get => _isLockScreenSpotlightDisabled;
+        set
+        {
+            if (!CanDisableLockScreenSpotlight) return;
+            if (SetProperty(ref _isLockScreenSpotlightDisabled, value))
+            {
+                if (value) DisableLockScreenSpotlight();
+                else EnableLockScreenSpotlight();
+            }
+        }
+    }
+
+    public bool IsFullPathInTitleEnabled
+    {
+        get => _isFullPathInTitleEnabled;
+        set
+        {
+            if (!CanShowFullPathInTitle) return;
+            if (SetProperty(ref _isFullPathInTitleEnabled, value))
+            {
+                if (value) EnableFullPathInTitle();
+                else DisableFullPathInTitle();
+            }
+        }
+    }
+
+    public bool IsLongPathsEnabled
+    {
+        get => _isLongPathsEnabled;
+        set
+        {
+            if (!CanEnableLongPaths) return;
+            if (SetProperty(ref _isLongPathsEnabled, value))
+            {
+                if (value) EnableLongPaths();
+                else DisableLongPaths();
+            }
+        }
+    }
+
     public Win11ViewModel()
     {
         _caps = new SystemCapabilities(SystemInfoService.Instance.Current);
@@ -386,6 +474,30 @@ public sealed class Win11ViewModel : ViewModelBase
         {
             _isTaskbarSecondsEnabled = _reg.GetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "ShowSecondsInSystemClock") == 1;
             OnPropertyChanged(nameof(IsTaskbarSecondsEnabled));
+        }
+
+        if (CanHideOneDriveNav)
+        {
+            _isOneDriveNavHidden = _reg.GetDword(RegistryHive.CurrentUser, OneDriveKey, "System.IsPinnedToNameSpaceTree") == 0;
+            OnPropertyChanged(nameof(IsOneDriveNavHidden));
+        }
+
+        if (CanDisableLockScreenSpotlight)
+        {
+            _isLockScreenSpotlightDisabled = _reg.GetDword(RegistryHive.CurrentUser, ContentDeliveryKey, "RotatingLockScreenEnabled") == 0;
+            OnPropertyChanged(nameof(IsLockScreenSpotlightDisabled));
+        }
+
+        if (CanShowFullPathInTitle)
+        {
+            _isFullPathInTitleEnabled = _reg.GetDword(RegistryHive.CurrentUser, CabinetStateKey, "FullPath") == 1;
+            OnPropertyChanged(nameof(IsFullPathInTitleEnabled));
+        }
+
+        if (CanEnableLongPaths)
+        {
+            _isLongPathsEnabled = _reg.GetDword(RegistryHive.LocalMachine, FileSystemKey, "LongPathsEnabled") == 1;
+            OnPropertyChanged(nameof(IsLongPathsEnabled));
         }
     }
 
@@ -572,5 +684,59 @@ public sealed class Win11ViewModel : ViewModelBase
         _reg.SetDword(RegistryHive.CurrentUser, ExplorerAdvancedKey, "ShowSecondsInSystemClock", 0);
         _log.Success("[任务栏时钟] 已隐藏秒数");
         _explorer.Restart();
+    }
+
+    private void HideOneDriveNav()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, OneDriveKey, "System.IsPinnedToNameSpaceTree", 0);
+        _log.Success("[OneDrive] 导航栏入口已隐藏");
+        _explorer.Restart();
+    }
+
+    private void ShowOneDriveNav()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, OneDriveKey, "System.IsPinnedToNameSpaceTree", 1);
+        _log.Success("[OneDrive] 导航栏入口已恢复");
+        _explorer.Restart();
+    }
+
+    private void DisableLockScreenSpotlight()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, ContentDeliveryKey, "RotatingLockScreenEnabled", 0);
+        _reg.SetDword(RegistryHive.CurrentUser, ContentDeliveryKey, "RotatingLockScreenOverlayEnabled", 0);
+        _log.Success("[Spotlight] 锁屏 Spotlight 已关闭");
+    }
+
+    private void EnableLockScreenSpotlight()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, ContentDeliveryKey, "RotatingLockScreenEnabled", 1);
+        _reg.SetDword(RegistryHive.CurrentUser, ContentDeliveryKey, "RotatingLockScreenOverlayEnabled", 1);
+        _log.Success("[Spotlight] 锁屏 Spotlight 已恢复");
+    }
+
+    private void EnableFullPathInTitle()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, CabinetStateKey, "FullPath", 1);
+        _log.Success("[完整路径] 标题栏已显示完整路径");
+        _explorer.Restart();
+    }
+
+    private void DisableFullPathInTitle()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser, CabinetStateKey, "FullPath", 0);
+        _log.Success("[完整路径] 标题栏已恢复默认");
+        _explorer.Restart();
+    }
+
+    private void EnableLongPaths()
+    {
+        _reg.SetDword(RegistryHive.LocalMachine, FileSystemKey, "LongPathsEnabled", 1);
+        _log.Success("[长路径] 已启用（部分程序需重启后生效）");
+    }
+
+    private void DisableLongPaths()
+    {
+        _reg.SetDword(RegistryHive.LocalMachine, FileSystemKey, "LongPathsEnabled", 0);
+        _log.Success("[长路径] 已关闭");
     }
 }

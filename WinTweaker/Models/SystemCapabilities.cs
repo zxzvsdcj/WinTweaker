@@ -86,6 +86,18 @@ public sealed class SystemCapabilities
     /// <summary>任务栏时钟显示秒（仅Win11）</summary>
     public bool CanShowTaskbarSeconds => _sysInfo.IsWindows11;
 
+    /// <summary>隐藏 OneDrive 导航栏（仅Win11）</summary>
+    public bool CanHideOneDriveNav => _sysInfo.IsWindows11;
+
+    /// <summary>禁用锁屏 Spotlight（仅Win11）</summary>
+    public bool CanDisableLockScreenSpotlight => _sysInfo.IsWindows11;
+
+    /// <summary>资源管理器标题栏显示完整路径（Win10/11）</summary>
+    public bool CanShowFullPathInTitle => _sysInfo.IsWindows11 || _sysInfo.IsWindows10;
+
+    /// <summary>启用 Win32 长路径（Win10/11）</summary>
+    public bool CanEnableLongPaths => _sysInfo.IsWindows11 || _sysInfo.IsWindows10;
+
     // ===== 高危操作 =====
     /// <summary>关闭 UAC（全版本可用）</summary>
     public bool CanDisableUac => true;
@@ -135,6 +147,10 @@ public sealed class SystemCapabilities
             "FolderContentsInfoTip" => "此功能仅适用于 Windows 11",
             "DisableSearchHighlights" => "此功能仅适用于 Windows 11",
             "ShowTaskbarSeconds" => "此功能仅适用于 Windows 11",
+            "HideOneDriveNav" => "此功能仅适用于 Windows 11",
+            "DisableLockScreenSpotlight" => "此功能仅适用于 Windows 11",
+            "ShowFullPathInTitle" => "当前系统不支持此功能",
+            "EnableLongPaths" => "当前系统不支持此功能",
             _ => "当前系统版本不支持此功能"
         };
     }
