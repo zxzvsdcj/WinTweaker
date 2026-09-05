@@ -5,10 +5,18 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="Win11 专属">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
-        <StackPanel Margin="0,16,0,16">
+    <Page.Resources>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="4,20,0,8" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </Page.Resources>
 
-            <!-- 版本提示 -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Margin="0,8,0,16">
+
             <ui:InfoBar
                 x:Name="VersionInfoBar"
                 IsOpen="{Binding ShowWin10Warning}"
@@ -16,7 +24,9 @@
                 Title="系统版本提示"
                 Message="以下功能仅适用于 Windows 11，当前系统不支持的功能已自动置灰" />
 
-            <!-- 经典右键菜单 -->
+            <!-- ===== 经典体验 ===== -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="经典体验" Margin="4,8,0,8" />
+
             <ui:CardControl IsEnabled="{Binding CanClassicContextMenu}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -29,7 +39,6 @@
                                  IsEnabled="{Binding CanClassicContextMenu}" />
             </ui:CardControl>
 
-            <!-- 任务栏左对齐 -->
             <ui:CardControl IsEnabled="{Binding CanTaskbarLeftAlign}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -42,7 +51,6 @@
                                  IsEnabled="{Binding CanTaskbarLeftAlign}" />
             </ui:CardControl>
 
-            <!-- 任务栏结束任务 -->
             <ui:CardControl IsEnabled="{Binding CanTaskbarEndTask}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -55,85 +63,6 @@
                                  IsEnabled="{Binding CanTaskbarEndTask}" />
             </ui:CardControl>
 
-            <!-- 隐藏 Gallery -->
-            <ui:CardControl IsEnabled="{Binding CanHideExplorerGallery}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="隐藏资源管理器 Gallery" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding HideExplorerGalleryTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsExplorerGalleryHidden, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanHideExplorerGallery}" />
-            </ui:CardControl>
-
-            <!-- 隐藏 Home -->
-            <ui:CardControl IsEnabled="{Binding CanHideExplorerHome}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="隐藏资源管理器 Home" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding HideExplorerHomeTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsExplorerHomeHidden, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanHideExplorerHome}" />
-            </ui:CardControl>
-
-            <!-- 禁用 Snap 悬停提示 -->
-            <ui:CardControl IsEnabled="{Binding CanDisableSnapFlyout}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="禁用 Snap Layouts 悬停提示" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding DisableSnapFlyoutTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsSnapFlyoutDisabled, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanDisableSnapFlyout}" />
-            </ui:CardControl>
-
-            <!-- 关闭开始菜单推荐广告 -->
-            <ui:CardControl IsEnabled="{Binding CanDisableStartRecommendations}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="关闭开始菜单推荐广告" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding DisableStartRecommendationsTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsStartRecommendationsDisabled, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanDisableStartRecommendations}" />
-            </ui:CardControl>
-
-            <!-- 文件夹悬停详细信息 -->
-            <ui:CardControl IsEnabled="{Binding CanFolderContentsInfoTip}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="文件夹悬停详细信息" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding FolderContentsInfoTipTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsFolderContentsInfoTipEnabled, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanFolderContentsInfoTip}" />
-            </ui:CardControl>
-
-            <!-- 禁用搜索高亮 -->
-            <ui:CardControl IsEnabled="{Binding CanDisableSearchHighlights}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="禁用搜索高亮" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding DisableSearchHighlightsTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsSearchHighlightsDisabled, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanDisableSearchHighlights}" />
-            </ui:CardControl>
-
-            <!-- 任务栏显示秒 -->
             <ui:CardControl IsEnabled="{Binding CanShowTaskbarSeconds}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -146,7 +75,33 @@
                                  IsEnabled="{Binding CanShowTaskbarSeconds}" />
             </ui:CardControl>
 
-            <!-- 隐藏 OneDrive -->
+            <!-- ===== 资源管理器 ===== -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="资源管理器" />
+
+            <ui:CardControl IsEnabled="{Binding CanHideExplorerGallery}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="隐藏 Gallery" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding HideExplorerGalleryTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsExplorerGalleryHidden, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanHideExplorerGallery}" />
+            </ui:CardControl>
+
+            <ui:CardControl IsEnabled="{Binding CanHideExplorerHome}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="隐藏 Home" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding HideExplorerHomeTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsExplorerHomeHidden, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanHideExplorerHome}" />
+            </ui:CardControl>
+
             <ui:CardControl IsEnabled="{Binding CanHideOneDriveNav}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -159,20 +114,6 @@
                                  IsEnabled="{Binding CanHideOneDriveNav}" />
             </ui:CardControl>
 
-            <!-- 禁用锁屏 Spotlight -->
-            <ui:CardControl IsEnabled="{Binding CanDisableLockScreenSpotlight}">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="禁用锁屏 Spotlight" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding DisableLockScreenSpotlightTooltip}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsLockScreenSpotlightDisabled, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanDisableLockScreenSpotlight}" />
-            </ui:CardControl>
-
-            <!-- 完整路径 -->
             <ui:CardControl IsEnabled="{Binding CanShowFullPathInTitle}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -185,20 +126,72 @@
                                  IsEnabled="{Binding CanShowFullPathInTitle}" />
             </ui:CardControl>
 
-            <!-- 长路径 -->
-            <ui:CardControl IsEnabled="{Binding CanEnableLongPaths}">
+            <ui:CardControl IsEnabled="{Binding CanFolderContentsInfoTip}">
                 <ui:CardControl.Header>
                     <StackPanel>
-                        <TextBlock FontWeight="Medium" Text="启用 Win32 长路径" />
+                        <TextBlock FontWeight="Medium" Text="文件夹悬停详细信息" />
                         <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding EnableLongPathsTooltip}" />
+                                   Text="{Binding FolderContentsInfoTipTooltip}" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <ui:ToggleSwitch IsChecked="{Binding IsLongPathsEnabled, Mode=TwoWay}"
-                                 IsEnabled="{Binding CanEnableLongPaths}" />
+                <ui:ToggleSwitch IsChecked="{Binding IsFolderContentsInfoTipEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanFolderContentsInfoTip}" />
             </ui:CardControl>
 
-            <!-- 禁用 Copilot -->
+            <!-- ===== 界面减扰 ===== -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="界面减扰" />
+
+            <ui:CardControl IsEnabled="{Binding CanDisableSnapFlyout}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用 Snap Layouts 悬停提示" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableSnapFlyoutTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsSnapFlyoutDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableSnapFlyout}" />
+            </ui:CardControl>
+
+            <ui:CardControl IsEnabled="{Binding CanDisableStartRecommendations}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="关闭开始菜单推荐广告" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableStartRecommendationsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsStartRecommendationsDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableStartRecommendations}" />
+            </ui:CardControl>
+
+            <ui:CardControl IsEnabled="{Binding CanDisableSearchHighlights}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用搜索高亮" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableSearchHighlightsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsSearchHighlightsDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableSearchHighlights}" />
+            </ui:CardControl>
+
+            <ui:CardControl IsEnabled="{Binding CanDisableLockScreenSpotlight}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用锁屏 Spotlight" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding DisableLockScreenSpotlightTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsLockScreenSpotlightDisabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanDisableLockScreenSpotlight}" />
+            </ui:CardControl>
+
+            <!-- ===== 系统组件 ===== -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="系统组件" />
+
             <ui:CardControl IsEnabled="{Binding CanDisableCopilot}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -211,7 +204,6 @@
                                  IsEnabled="{Binding CanDisableCopilot}" />
             </ui:CardControl>
 
-            <!-- 禁用 Widgets -->
             <ui:CardControl IsEnabled="{Binding CanDisableWidgets}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -224,7 +216,6 @@
                                  IsEnabled="{Binding CanDisableWidgets}" />
             </ui:CardControl>
 
-            <!-- 关闭任务栏 Bing -->
             <ui:CardControl IsEnabled="{Binding CanDisableTaskbarBing}">
                 <ui:CardControl.Header>
                     <StackPanel>
@@ -235,6 +226,21 @@
                 </ui:CardControl.Header>
                 <ui:ToggleSwitch IsChecked="{Binding IsTaskbarBingDisabled, Mode=TwoWay}"
                                  IsEnabled="{Binding CanDisableTaskbarBing}" />
+            </ui:CardControl>
+
+            <!-- ===== 开发者 ===== -->
+            <TextBlock Style="{StaticResource SectionHeader}" Text="开发者" />
+
+            <ui:CardControl IsEnabled="{Binding CanEnableLongPaths}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="启用 Win32 长路径" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding EnableLongPathsTooltip}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsLongPathsEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanEnableLongPaths}" />
             </ui:CardControl>
 
         </StackPanel>
