@@ -22,6 +22,8 @@ public sealed class GeneralViewModel : ViewModelBase
     private bool _isBackgroundDisabled;
     private bool _isHibernationDisabled;
     private bool _isExplorerOptimized;
+    private bool _isFileExtensionsShown;
+    private bool _isReservedStorageDisabled;
 
     public bool IsUltimatePowerEnabled
     {
@@ -114,6 +116,32 @@ public sealed class GeneralViewModel : ViewModelBase
         }
     }
 
+    public bool IsFileExtensionsShown
+    {
+        get => _isFileExtensionsShown;
+        set
+        {
+            if (SetProperty(ref _isFileExtensionsShown, value))
+            {
+                if (value) ShowFileExtensions();
+                else HideFileExtensions();
+            }
+        }
+    }
+
+    public bool IsReservedStorageDisabled
+    {
+        get => _isReservedStorageDisabled;
+        set
+        {
+            if (SetProperty(ref _isReservedStorageDisabled, value))
+            {
+                if (value) DisableReservedStorage();
+                else EnableReservedStorage();
+            }
+        }
+    }
+
     public ICommand GenerateWslConfigCommand { get; }
 
     public GeneralViewModel()
@@ -156,10 +184,20 @@ public sealed class GeneralViewModel : ViewModelBase
             @"SYSTEM\CurrentControlSet\Control\Power", "HibernateEnabled") == 0;
         OnPropertyChanged(nameof(IsHibernationDisabled));
 
-        // 资源管理器：HideFileExt=0 表示已优化（强制显示扩展名）
-        _isExplorerOptimized = _reg.GetDword(RegistryHive.CurrentUser,
-            @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "HideFileExt") == 0;
+        // 资源管理器：云广告关闭 + 显示受保护系统文件
+        string advanced = @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
+        _isExplorerOptimized = _reg.GetDword(RegistryHive.CurrentUser, advanced, "ShowSyncProviderNotifications") == 0
+            && _reg.GetDword(RegistryHive.CurrentUser, advanced, "ShowSuperHidden") == 1;
         OnPropertyChanged(nameof(IsExplorerOptimized));
+
+        // 始终显示文件扩展名
+        _isFileExtensionsShown = _reg.GetDword(RegistryHive.CurrentUser, advanced, "HideFileExt") == 0;
+        OnPropertyChanged(nameof(IsFileExtensionsShown));
+
+        // 保留存储
+        _isReservedStorageDisabled = _reg.GetDword(RegistryHive.LocalMachine,
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager", "ShippedWithReserves") == 0;
+        OnPropertyChanged(nameof(IsReservedStorageDisabled));
     }
 
     /// <summary>检查指定服务是否全部处于 Disabled 状态</summary>
@@ -324,23 +362,45 @@ public sealed class GeneralViewModel : ViewModelBase
     private void OptimizeExplorer()
     {
         string advanced = @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
-        _reg.SetDword(RegistryHive.CurrentUser, advanced, "HideFileExt", 0);
         _reg.SetDword(RegistryHive.CurrentUser, advanced, "ShowSuperHidden", 1);
-
-        _reg.SetDword(RegistryHive.CurrentUser,
-            @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "ShowSyncProviderNotifications", 0);
-
-        _log.Success("[资源管理器] 已优化：显示扩展名、关闭云广告");
+        _reg.SetDword(RegistryHive.CurrentUser, advanced, "ShowSyncProviderNotifications", 0);
+        _log.Success("[资源管理器] 已优化：显示受保护系统文件、关闭云广告");
     }
 
     private void RestoreExplorer()
     {
         string advanced = @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
-        _reg.SetDword(RegistryHive.CurrentUser, advanced, "HideFileExt", 1);
         _reg.SetDword(RegistryHive.CurrentUser, advanced, "ShowSuperHidden", 0);
         _reg.SetDword(RegistryHive.CurrentUser, advanced, "ShowSyncProviderNotifications", 1);
-
         _log.Success("[资源管理器] 已恢复默认");
+    }
+
+    private void ShowFileExtensions()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser,
+            @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "HideFileExt", 0);
+        _log.Success("[文件扩展名] 已强制显示所有文件扩展名");
+    }
+
+    private void HideFileExtensions()
+    {
+        _reg.SetDword(RegistryHive.CurrentUser,
+            @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "HideFileExt", 1);
+        _log.Success("[文件扩展名] 已恢复隐藏已知扩展名");
+    }
+
+    private void DisableReservedStorage()
+    {
+        _reg.SetDword(RegistryHive.LocalMachine,
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager", "ShippedWithReserves", 0);
+        _log.Success("[保留存储] 已禁用（重启后逐步释放约数 GB；重大更新前建议重新启用）");
+    }
+
+    private void EnableReservedStorage()
+    {
+        _reg.SetDword(RegistryHive.LocalMachine,
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager", "ShippedWithReserves", 1);
+        _log.Success("[保留存储] 已恢复启用");
     }
 
     #endregion

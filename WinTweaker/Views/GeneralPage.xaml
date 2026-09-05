@@ -87,10 +87,34 @@
                     <StackPanel>
                         <TextBlock FontWeight="Medium" Text="资源管理器优化" />
                         <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="关闭云广告、强制显示文件扩展名" />
+                                   Text="关闭云广告、显示受保护的操作系统文件" />
                     </StackPanel>
                 </ui:CardControl.Header>
                 <ui:ToggleSwitch IsChecked="{Binding IsExplorerOptimized, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 始终显示文件扩展名 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="始终显示文件扩展名" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="强制显示所有扩展名，降低脚本伪装风险（开发者加固）" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsFileExtensionsShown, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 禁用保留存储 -->
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="禁用保留存储" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="释放 Windows 预留磁盘空间（重启后生效；大更新前建议重新启用）" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsReservedStorageDisabled, Mode=TwoWay}" />
             </ui:CardControl>
 
             <!-- WSL2 配置 -->
