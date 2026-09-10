@@ -2,11 +2,11 @@ using System.Windows.Controls;
 
 namespace WinTweaker.Views;
 
-public partial class LogPage : Page
+public partial class HelpPage : Page
 {
-    public LogPage()
+    public HelpPage()
     {
         InitializeComponent();
-        DataContext = ViewModelLocator.Log;
+        DataContext = ViewModelLocator.Profile;
     }
 }

@@ -7,6 +7,6 @@ public partial class GeneralPage : Page
     public GeneralPage()
     {
         InitializeComponent();
-        DataContext = new ViewModels.GeneralViewModel();
+        DataContext = ViewModelLocator.General;
     }
 }

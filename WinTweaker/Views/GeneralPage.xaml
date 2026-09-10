@@ -4,9 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:WinTweaker.ViewModels"
-    Title="常规优化">
+    Title="常规优化"
+    ScrollViewer.CanContentScroll="False">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,0,0">
         <StackPanel Margin="0,16,0,16">
 
             <!-- 电源计划 -->
@@ -115,6 +116,20 @@
                     </StackPanel>
                 </ui:CardControl.Header>
                 <ui:ToggleSwitch IsChecked="{Binding IsReservedStorageDisabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- 内存完整性（HVCI） -->
+            <ui:CardControl IsEnabled="{Binding CanToggleMemoryIntegrity}">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock FontWeight="Medium" Text="内存完整性（HVCI）" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding MemoryIntegrityDescription}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch IsChecked="{Binding IsMemoryIntegrityEnabled, Mode=TwoWay}"
+                                 IsEnabled="{Binding CanToggleMemoryIntegrity}" />
             </ui:CardControl>
 
             <!-- WSL2 配置 -->

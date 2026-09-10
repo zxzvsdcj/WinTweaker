@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:models="clr-namespace:WinTweaker.Models"
-    Title="日志">
+    Title="日志"
+    ScrollViewer.CanContentScroll="False">
 
     <Grid Margin="0,16,0,16">
         <Grid.RowDefinitions>

@@ -2,14 +2,21 @@
     x:Class="WinTweaker.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    StartupUri="Views/MainWindow.xaml">
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- 透明背景保证内容空白区域也能命中滚轮；Focusable 便于接收输入 -->
+            <Style TargetType="ScrollViewer">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Focusable" Value="True" />
+                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                <Setter Property="PanningMode" Value="VerticalOnly" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

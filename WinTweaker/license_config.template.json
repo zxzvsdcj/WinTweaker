@@ -1,0 +1,7 @@
+{
+  "app_id": "飞书只读应用 App ID（cli_ 开头）",
+  "app_secret": "飞书只读应用 App Secret",
+  "bitable_token": "多维表格 App Token",
+  "table_id": "数据表 ID（tbl 开头）",
+  "product_code": "win-tweaker"
+}

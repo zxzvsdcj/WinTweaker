@@ -7,6 +7,6 @@ public partial class DangerPage : Page
     public DangerPage()
     {
         InitializeComponent();
-        DataContext = new ViewModels.DangerViewModel();
+        DataContext = ViewModelLocator.Danger;
     }
 }

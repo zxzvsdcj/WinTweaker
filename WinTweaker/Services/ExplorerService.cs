@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using WinTweaker.License;
 
 namespace WinTweaker.Services;
 
@@ -19,6 +20,11 @@ public sealed class ExplorerService
     /// </summary>
     public bool Restart()
     {
+        if (!LicenseGate.EnsureLicensed(out var deny))
+        {
+            _log.Error($"[授权] 已阻断 Explorer 重启：{deny}");
+            return false;
+        }
         try
         {
             foreach (var process in Process.GetProcessesByName("explorer"))

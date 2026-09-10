@@ -163,6 +163,9 @@ public sealed class DangerViewModel : ViewModelBase
     /// <summary>高危操作二次确认弹窗</summary>
     private static bool ConfirmDangerAction(string message)
     {
+        if (ProfileApplyContext.SuppressDangerConfirm)
+            return true;
+
         var result = MessageBox.Show(
             message,
             "高危操作确认",

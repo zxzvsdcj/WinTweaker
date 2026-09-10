@@ -8,6 +8,6 @@ public partial class UpdatePage : Page
     public UpdatePage()
     {
         InitializeComponent();
-        DataContext = new UpdateViewModel();
+        DataContext = ViewModelLocator.Update;
     }
 }

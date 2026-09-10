@@ -25,6 +25,19 @@ Thumbs.db
 ## Crash logs
 crash.log
 
+## WuGuard license secrets (never commit)
+license_config.json
+**/license_config.json
+!**/license_config.template.json
+
+## Local verification scripts (not for public push)
+scripts/*
+!scripts/package-dist.ps1
+!scripts/verify-dist.ps1
+
+## Customer distribution output (local only)
+dist/
+
 ## Project internal (not for remote)
 docs/
 tools/

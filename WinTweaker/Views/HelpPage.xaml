@@ -1,0 +1,166 @@
+<Page
+    x:Class="WinTweaker.Views.HelpPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="帮助"
+    ScrollViewer.CanContentScroll="False">
+
+    <Page.Resources>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,20,0,8" />
+        </Style>
+        <Style x:Key="BodyText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="22" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        </Style>
+        <Style x:Key="MutedText" TargetType="TextBlock" BasedOn="{StaticResource BodyText}">
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,0,0">
+        <StackPanel Margin="0,8,0,24">
+
+            <ui:InfoBar
+                IsOpen="True"
+                IsClosable="False"
+                Severity="Success"
+                Title="功能定制"
+                Message="本软件支持按客户需求定制功能模块（增删优化项、调整默认策略、企业专属配置等）。如需定制请联系作者微信：zxzvsdcj" />
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="关于软件" Margin="0,12,0,8" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" FontWeight="SemiBold" Text="Win-Tweaker 系统优化工具" />
+                    <TextBlock Style="{StaticResource MutedText}" Text="Windows 10/11 全版本开发者优化工具，覆盖性能调优、隐私保护、更新管理与 Win11 体验还原。" />
+                    <TextBlock Style="{StaticResource BodyText}" Margin="0,8,0,0" Text="作者：微信号：zxzvsdcj" />
+                    <TextBlock Style="{StaticResource MutedText}" Text="版本：1.0.0　|　需管理员权限启动" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="配置方案（导出 / 导入）" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}"
+                               Text="可将当前全部开关状态导出为 JSON 方案文件，下次导入一键复用，也可发给其他客户使用。" />
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,6,0,10"
+                               Text="兼容策略：未知功能键自动跳过；方案未包含的项保持现状；含高危项时会统一确认一次。" />
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Content="导出方案" Command="{Binding ExportCommand}"
+                                   Appearance="Primary" Icon="{ui:SymbolIcon ArrowUpload24}" Margin="0,0,8,0" />
+                        <ui:Button Content="导入方案" Command="{Binding ImportCommand}"
+                                   Appearance="Secondary" Icon="{ui:SymbolIcon ArrowDownload24}" />
+                    </StackPanel>
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="快速上手" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" Text="1. 右键程序 →「以管理员身份运行」（首次会弹出 UAC 确认）。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="2. 若出现激活窗口：复制机器码发给作者微信 zxzvsdcj，完成授权后重启软件。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="3. 左侧导航选择功能页，打开开关即可应用；再次关闭开关即可回滚。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="4. 部分项需重启资源管理器或注销/重启后生效（如内存完整性 HVCI），日志页会提示。" />
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,8,0,0"
+                               Text="提示：灰色不可用项表示当前系统版本不支持，属正常现象。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="版本说明（分发包）" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" FontWeight="SemiBold" Text="轻量版（框架依赖）" />
+                    <TextBlock Style="{StaticResource MutedText}"
+                               Text="体积小。目标电脑需已安装 .NET 9 Desktop Runtime x64。若启动提示缺少运行库，请安装微软官方运行时或改用完整版。" />
+                    <TextBlock Style="{StaticResource BodyText}" FontWeight="SemiBold" Margin="0,8,0,0" Text="完整版（自包含）" />
+                    <TextBlock Style="{StaticResource MutedText}"
+                               Text="体积较大，内含运行库，无需预装 .NET，双击即可使用。推荐给不确定是否安装过 .NET 的客户。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="常规优化 — 操作指引" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 卓越性能电源计划：启用隐藏的 Ultimate Performance，适合高性能工作站。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 系统遥测降级：诊断数据降为基础级，减少后台上传。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 关闭系统广告：禁用锁屏/开始菜单/通知等推荐与广告。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 裁剪冗余服务：禁用 DiagTrack、Xbox、SysMain 等；回滚时恢复为操作前状态。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 全局禁止后台运行：阻止 UWP/商店应用后台耗电。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 关闭休眠：删除 hiberfil.sys 释放 C 盘（仍保留睡眠）。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 资源管理器优化：关闭云广告、显示受保护系统文件。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 始终显示文件扩展名：降低伪装脚本风险。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 禁用保留存储：释放预留空间；大更新前建议重新开启。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 内存完整性（HVCI）：内核 Hypervisor 防护；关后可释放 VT-x/AMD-V 给 VMware/VirtualBox，需重启生效。" />
+                    <TextBlock Style="{StaticResource MutedText}"
+                               Text="切换 HVCI 会二次确认；界面显示「运行中 / 已关闭 / 待重启」。BIOS 未开虚拟化时开关置灰。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• WSL2 高性能配置：点击「生成配置」写入优化的 .wslconfig。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="更新管理 — 操作指引" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 禁止 Edge / Chrome 自动更新：通过策略与服务阻止后台更新。" />
+                    <TextBlock Style="{StaticResource MutedText}"
+                               Text="禁用后浏览器 About 页可能显示「更新由组织管理」。需要新版本时请手动安装官方安装包，或关闭对应开关恢复自动更新。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="Win11 专属 — 操作指引" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 经典右键菜单 / 任务栏左对齐 / 结束任务：还原更接近 Win10 的交互。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 隐藏 Gallery、Home、OneDrive：精简资源管理器导航栏。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 禁用 Snap 悬停、搜索高亮、Widgets、Copilot、锁屏 Spotlight、必应搜索：减少干扰与后台占用。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 任务栏时钟显示秒、标题栏完整路径、长路径支持、文件夹悬停详情：提升开发效率。" />
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,8,0,0"
+                               Text="部分项需重启 Explorer；经典右键菜单写入 CLSID 后重启资源管理器即可生效。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="高危操作 — 务必阅读" />
+            <ui:Card>
+                <StackPanel>
+                    <ui:InfoBar
+                        IsOpen="True"
+                        IsClosable="False"
+                        Severity="Warning"
+                        Title="安全提示"
+                        Message="关闭 UAC、防火墙、Defender 或 Windows Update 会降低防护能力。仅在明确需求时使用，并可用「恢复全部」一键回滚。" />
+                    <TextBlock Style="{StaticResource BodyText}" Margin="0,8,0,0"
+                               Text="• 关闭 UAC：需重启生效。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 关闭防火墙：域/专用/公用配置文件全部关闭。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 压制 Defender：通过策略压制实时防护（家庭版可能受限）。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 禁止 Windows 更新：停止自动补丁；建议定期手动检查安全更新。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="日志与排障" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 左侧底部「日志」：黑=信息、绿=成功、黄=警告、红=错误。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 可用「复制全部」发给技术支持协助排查。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 轻量版无法启动：安装 .NET 9 Desktop Runtime x64，或改用完整版。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 功能灰色：当前系统不支持该项，无需处理。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 授权失败：核对机器码、网络，或联系微信 zxzvsdcj。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="联系与定制" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyText}" FontWeight="SemiBold" Text="作者微信：zxzvsdcj" />
+                    <TextBlock Style="{StaticResource MutedText}"
+                               Text="支持功能定制：可按企业/个人场景增减模块、调整默认开关、定制文案与交付包。请通过微信说明需求与系统环境。" />
+                </StackPanel>
+            </ui:Card>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

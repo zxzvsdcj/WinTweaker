@@ -70,6 +70,39 @@ Windows 10/11 全版本系统开发者优化工具，提供系统性能调优、
 - Windows 11 全版本（21H2 ~ 25H2）
 - **管理员权限**（程序启动时强制提升）
 
+## 授权（WuGuard）
+
+本产品通过 WuGuard 飞书多维表格做买家端授权校验（直连飞书只读 OpenAPI，不依赖卖家本机 `127.0.0.1:8090`）。
+
+| 项 | 值 |
+|----|-----|
+| `product_code` | `win-tweaker` |
+| 产品展示名 | WinTweaker |
+| 机器码算法 | `SHA256("WuGuard\|" + MachineGuid + "\|" + ComputerName)` → 64 位小写 hex |
+| 离线缓存 | `%APPDATA%\WuGuard\license.dat`（7 天宽限） |
+
+### 配置步骤
+
+1. 在 **WuGuard License Admin** 登记产品：`product_code=win-tweaker`，展示名 `WinTweaker`
+2. 复制模板并填写飞书**只读**应用凭证（勿提交 Git）：
+
+```bash
+copy WinTweaker\license_config.template.json WinTweaker\license_config.json
+```
+
+字段：`app_id` / `app_secret` / `bitable_token` / `table_id` / `product_code`（保持 `win-tweaker`）
+
+3. 启动应用，将激活页展示的机器码录入管理后台
+4. 本地冒烟：
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\scripts\verify-license.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\verify-license.ps1 -Online
+# 或
+dotnet run --project WinTweaker\WinTweaker.csproj -c Debug -- --license-check
+dotnet run --project WinTweaker\WinTweaker.csproj -c Debug -- --license-check --online
+```
+
 ## 编译与发布
 
 ### 环境准备
@@ -105,7 +138,9 @@ dotnet publish WinTweaker\WinTweaker.csproj -c Release -p:PublishProfile=Full
 
 ```
 WinTweaker/
-├── App.xaml(.cs)              # 程序入口，主题初始化，系统版本校验
+├── App.xaml(.cs)              # 程序入口，主题初始化，系统版本校验，授权门闩
+├── License/                   # WuGuard 授权（机器码 / 飞书 / 离线缓存）
+├── license_config.template.json
 ├── Assets/                    # 图标资源
 ├── Models/
 │   ├── LogEntry.cs            # 日志条目模型
@@ -132,7 +167,9 @@ WinTweaker/
 │   ├── UpdatePage.xaml(.cs)   # 更新管理页
 │   ├── Win11Page.xaml(.cs)    # Win11 专属页
 │   ├── DangerPage.xaml(.cs)   # 高危操作页
+│   ├── HelpPage.xaml(.cs)     # 帮助 / 使用指引
 │   └── LogPage.xaml(.cs)      # 日志页
+├── 使用教程.md                # 客户分发附带教程
 └── Properties/
     ├── app.manifest           # 管理员权限清单
     └── PublishProfiles/       # 发布配置
@@ -190,6 +227,20 @@ WinTweaker/
 - 带时间戳的四色分级日志：黑(信息)、绿(成功)、黄(警告)、红(错误)
 - 支持清空和复制全部日志
 - 自动提示版本兼容性警告
+
+## 作者
+
+微信号：zxzvsdcj（支持功能定制）
+
+软件内「帮助」页提供详细操作指引；客户分发包另附《使用教程.md》。
+
+## 客户分发
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\scripts\package-dist.ps1
+```
+
+输出：`dist/轻量版`（需 .NET 9）、`dist/完整版`（自包含免运行时），以及对应 ZIP。
 
 ## 许可证
 

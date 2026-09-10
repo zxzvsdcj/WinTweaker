@@ -7,6 +7,6 @@ public partial class Win11Page : Page
     public Win11Page()
     {
         InitializeComponent();
-        DataContext = new ViewModels.Win11ViewModel();
+        DataContext = ViewModelLocator.Win11;
     }
 }

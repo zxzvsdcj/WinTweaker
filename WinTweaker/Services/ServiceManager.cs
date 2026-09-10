@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using Microsoft.Win32;
+using WinTweaker.License;
 
 namespace WinTweaker.Services;
 
@@ -63,6 +64,11 @@ public sealed class ServiceManager
     /// </summary>
     public bool DisableService(string serviceName)
     {
+        if (!LicenseGate.EnsureLicensed(out var deny))
+        {
+            _log.Error($"[授权] 已阻断服务操作：{deny}");
+            return false;
+        }
         try
         {
             if (!ServiceExists(serviceName))
@@ -93,6 +99,11 @@ public sealed class ServiceManager
     /// </summary>
     public bool RestoreService(string serviceName)
     {
+        if (!LicenseGate.EnsureLicensed(out var deny))
+        {
+            _log.Error($"[授权] 已阻断服务操作：{deny}");
+            return false;
+        }
         try
         {
             lock (_lock)

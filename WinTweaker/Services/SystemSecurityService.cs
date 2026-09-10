@@ -1,10 +1,11 @@
+using System.Management;
 using Microsoft.Win32;
 using WinTweaker.Models;
 
 namespace WinTweaker.Services;
 
 /// <summary>
-/// 系统安全服务 —— UAC / Defender / 防火墙
+/// 系统安全服务 —— UAC / Defender / 防火墙 / 内存完整性（HVCI）
 /// 自动适配新版 Win11 策略限制并日志明确提示
 /// </summary>
 public sealed class SystemSecurityService
@@ -191,6 +192,194 @@ public sealed class SystemSecurityService
             _log.Success("[防火墙] 已全部恢复开启");
         return success;
     }
+
+    #endregion
+
+    #region HVCI / Memory Integrity
+
+    private const string DeviceGuardPath =
+        @"SYSTEM\CurrentControlSet\Control\DeviceGuard";
+    private const string HvciPath =
+        @"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity";
+
+    /// <summary>内存完整性（HVCI）运行态：关闭 / 运行中 / 待重启。</summary>
+    public enum MemoryIntegrityState
+    {
+        Off,
+        OnRunning,
+        PendingRestart
+    }
+
+    /// <summary>BIOS/固件是否已开启 CPU 硬件虚拟化（Intel VT-x / AMD-V）。</summary>
+    public bool IsHardwareVirtualizationEnabled()
+    {
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "SELECT VirtualizationFirmwareEnabled FROM Win32_Processor");
+            using var results = searcher.Get();
+            foreach (ManagementBaseObject obj in results)
+            {
+                using (obj as IDisposable)
+                {
+                    object? raw = obj["VirtualizationFirmwareEnabled"];
+                    if (raw != null && Convert.ToBoolean(raw))
+                        return true;
+                }
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // 检测失败时不误伤可用机器：允许操作，由注册表写入结果报错
+            _log.Warning($"[HVCI] 无法检测 CPU 硬件虚拟化状态：{ex.Message}");
+            return true;
+        }
+    }
+
+    /// <summary>注册表中的内存完整性期望开关（Enabled==1）。</summary>
+    public bool IsMemoryIntegrityConfigured()
+    {
+        return _reg.GetDword(RegistryHive.LocalMachine, HvciPath, "Enabled") == 1;
+    }
+
+    /// <summary>
+    /// 读取 DeviceGuard CIM 与注册表，判定三态：
+    /// 运行中 / 已关闭 / 待重启生效。
+    /// </summary>
+    public MemoryIntegrityState GetMemoryIntegrityState()
+    {
+        bool registryOn = IsMemoryIntegrityConfigured();
+        var snap = QueryDeviceGuard();
+
+        if (snap is null)
+            return registryOn ? MemoryIntegrityState.PendingRestart : MemoryIntegrityState.Off;
+
+        bool running = snap.VbsStatus == 2 && ContainsService(snap.ServicesRunning, 2);
+        bool configuredNotRunning = snap.VbsStatus == 1 && ContainsService(snap.ServicesConfigured, 2);
+
+        // 注册表期望与实际运行不一致 → 待重启
+        if (running != registryOn)
+            return MemoryIntegrityState.PendingRestart;
+        if (configuredNotRunning)
+            return MemoryIntegrityState.PendingRestart;
+        if (running)
+            return MemoryIntegrityState.OnRunning;
+        return MemoryIntegrityState.Off;
+    }
+
+    public string GetMemoryIntegrityStatusText()
+    {
+        return GetMemoryIntegrityState() switch
+        {
+            MemoryIntegrityState.OnRunning => "当前状态：已开启（运行中）",
+            MemoryIntegrityState.PendingRestart => "当前状态：待重启生效（配置已更改但尚未重启）",
+            _ => "当前状态：已关闭"
+        };
+    }
+
+    /// <summary>开启内存完整性（写入注册表，需重启生效）。</summary>
+    public bool EnableMemoryIntegrity() => SetMemoryIntegrity(enable: true);
+
+    /// <summary>关闭内存完整性（写入注册表，需重启生效）。</summary>
+    public bool DisableMemoryIntegrity() => SetMemoryIntegrity(enable: false);
+
+    private bool SetMemoryIntegrity(bool enable)
+    {
+        int target = enable ? 1 : 0;
+        string action = enable ? "开启" : "关闭";
+        string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        int? beforeHvci = _reg.GetDword(RegistryHive.LocalMachine, HvciPath, "Enabled");
+        int? beforeVbs = _reg.GetDword(RegistryHive.LocalMachine, DeviceGuardPath, "EnableVirtualizationBasedSecurity");
+
+        _log.Warning(
+            $"[HVCI] {timestamp} 准备{action}内存完整性 | 改前 Enabled={Fmt(beforeHvci)}, EnableVirtualizationBasedSecurity={Fmt(beforeVbs)}");
+
+        bool ok = _reg.SetDword(RegistryHive.LocalMachine, HvciPath, "Enabled", target);
+        ok &= _reg.SetDword(RegistryHive.LocalMachine, DeviceGuardPath, "EnableVirtualizationBasedSecurity", target);
+
+        int? afterHvci = _reg.GetDword(RegistryHive.LocalMachine, HvciPath, "Enabled");
+        int? afterVbs = _reg.GetDword(RegistryHive.LocalMachine, DeviceGuardPath, "EnableVirtualizationBasedSecurity");
+
+        _log.Info(
+            $"[HVCI] {timestamp} 改后 Enabled={Fmt(afterHvci)}, EnableVirtualizationBasedSecurity={Fmt(afterVbs)}");
+
+        if (ok && afterHvci == target && afterVbs == target)
+        {
+            _log.Success($"[HVCI] 已{action}内存完整性（需重启电脑后生效）");
+            return true;
+        }
+
+        _log.Error($"[HVCI] {action}失败：注册表写入未成功，请确认以管理员权限运行");
+        return false;
+    }
+
+    private sealed class DeviceGuardSnapshot
+    {
+        public int VbsStatus { get; init; }
+        public int[] ServicesRunning { get; init; } = [];
+        public int[] ServicesConfigured { get; init; } = [];
+    }
+
+    private DeviceGuardSnapshot? QueryDeviceGuard()
+    {
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                @"root\Microsoft\Windows\DeviceGuard",
+                "SELECT VirtualizationBasedSecurityStatus, SecurityServicesRunning, SecurityServicesConfigured FROM Win32_DeviceGuard");
+
+            using var results = searcher.Get();
+            foreach (ManagementBaseObject obj in results)
+            {
+                using (obj as IDisposable)
+                {
+                    return new DeviceGuardSnapshot
+                    {
+                        VbsStatus = Convert.ToInt32(obj["VirtualizationBasedSecurityStatus"] ?? 0),
+                        ServicesRunning = ToIntArray(obj["SecurityServicesRunning"]),
+                        ServicesConfigured = ToIntArray(obj["SecurityServicesConfigured"])
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Warning($"[HVCI] 读取 Win32_DeviceGuard 失败：{ex.Message}");
+        }
+
+        return null;
+    }
+
+    private static bool ContainsService(int[] services, int code)
+        => Array.IndexOf(services, code) >= 0;
+
+    private static int[] ToIntArray(object? value)
+    {
+        if (value is null) return [];
+        if (value is int[] ints) return ints;
+        if (value is uint[] uints)
+        {
+            var mapped = new int[uints.Length];
+            for (int i = 0; i < uints.Length; i++)
+                mapped[i] = (int)uints[i];
+            return mapped;
+        }
+        if (value is Array arr)
+        {
+            var list = new List<int>(arr.Length);
+            foreach (object? item in arr)
+            {
+                if (item != null)
+                    list.Add(Convert.ToInt32(item));
+            }
+            return list.ToArray();
+        }
+        return [];
+    }
+
+    private static string Fmt(int? value) => value?.ToString() ?? "(未设置)";
 
     #endregion
 }

@@ -1,6 +1,8 @@
 using System.IO;
+using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
+using WinTweaker.License;
 using WinTweaker.Models;
 using WinTweaker.Services;
 
@@ -14,6 +16,7 @@ public sealed class GeneralViewModel : ViewModelBase
     private readonly RegistryService _reg = RegistryService.Instance;
     private readonly ServiceManager _svc = ServiceManager.Instance;
     private readonly LogService _log = LogService.Instance;
+    private readonly SystemSecurityService _security = SystemSecurityService.Instance;
 
     private bool _isUltimatePowerEnabled;
     private bool _isTelemetryReduced;
@@ -24,6 +27,10 @@ public sealed class GeneralViewModel : ViewModelBase
     private bool _isExplorerOptimized;
     private bool _isFileExtensionsShown;
     private bool _isReservedStorageDisabled;
+    private bool _isMemoryIntegrityEnabled;
+    private bool _canToggleMemoryIntegrity;
+    private string _memoryIntegrityStatusText = string.Empty;
+    private string _memoryIntegrityDescription = string.Empty;
 
     public bool IsUltimatePowerEnabled
     {
@@ -142,6 +149,89 @@ public sealed class GeneralViewModel : ViewModelBase
         }
     }
 
+    /// <summary>内存完整性（HVCI）开关：绑定注册表期望状态。</summary>
+    public bool IsMemoryIntegrityEnabled
+    {
+        get => _isMemoryIntegrityEnabled;
+        set
+        {
+            if (!_canToggleMemoryIntegrity)
+            {
+                SetProperty(ref _isMemoryIntegrityEnabled, _security.IsMemoryIntegrityConfigured());
+                return;
+            }
+
+            if (!SetProperty(ref _isMemoryIntegrityEnabled, value))
+                return;
+
+            if (value)
+            {
+                if (!ConfirmMemoryIntegrityChange(enable: true))
+                {
+                    SetProperty(ref _isMemoryIntegrityEnabled, false);
+                    return;
+                }
+
+                if (!_security.EnableMemoryIntegrity())
+                {
+                    SetProperty(ref _isMemoryIntegrityEnabled, false);
+                    MessageBox.Show(
+                        "开启内存完整性失败：注册表写入未成功。请确认以管理员权限运行本程序。",
+                        "操作失败",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    RefreshMemoryIntegrityUi();
+                    return;
+                }
+            }
+            else
+            {
+                if (!ConfirmMemoryIntegrityChange(enable: false))
+                {
+                    SetProperty(ref _isMemoryIntegrityEnabled, true);
+                    return;
+                }
+
+                if (!_security.DisableMemoryIntegrity())
+                {
+                    SetProperty(ref _isMemoryIntegrityEnabled, true);
+                    MessageBox.Show(
+                        "关闭内存完整性失败：注册表写入未成功。请确认以管理员权限运行本程序。",
+                        "操作失败",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    RefreshMemoryIntegrityUi();
+                    return;
+                }
+            }
+
+            MessageBox.Show(
+                "设置已更改，重启电脑后生效。",
+                "内存完整性",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            RefreshMemoryIntegrityUi();
+        }
+    }
+
+    public bool CanToggleMemoryIntegrity
+    {
+        get => _canToggleMemoryIntegrity;
+        private set => SetProperty(ref _canToggleMemoryIntegrity, value);
+    }
+
+    public string MemoryIntegrityStatusText
+    {
+        get => _memoryIntegrityStatusText;
+        private set => SetProperty(ref _memoryIntegrityStatusText, value);
+    }
+
+    public string MemoryIntegrityDescription
+    {
+        get => _memoryIntegrityDescription;
+        private set => SetProperty(ref _memoryIntegrityDescription, value);
+    }
+
     public ICommand GenerateWslConfigCommand { get; }
 
     public GeneralViewModel()
@@ -198,6 +288,57 @@ public sealed class GeneralViewModel : ViewModelBase
         _isReservedStorageDisabled = _reg.GetDword(RegistryHive.LocalMachine,
             @"SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager", "ShippedWithReserves") == 0;
         OnPropertyChanged(nameof(IsReservedStorageDisabled));
+
+        // 内存完整性（HVCI）
+        RefreshMemoryIntegrityUi();
+    }
+
+    private void RefreshMemoryIntegrityUi()
+    {
+        CanToggleMemoryIntegrity = _security.IsHardwareVirtualizationEnabled();
+        _isMemoryIntegrityEnabled = _security.IsMemoryIntegrityConfigured();
+        OnPropertyChanged(nameof(IsMemoryIntegrityEnabled));
+        MemoryIntegrityStatusText = _security.GetMemoryIntegrityStatusText();
+
+        if (!CanToggleMemoryIntegrity)
+        {
+            MemoryIntegrityDescription =
+                "CPU 硬件虚拟化未启用，请在 BIOS 中开启 Intel VT-x / AMD-V。\n" +
+                "内存完整性利用 Hypervisor 保护内核；关闭后便于 VMware/VirtualBox 使用虚拟化，但会降低内核防护。";
+        }
+        else
+        {
+            MemoryIntegrityDescription =
+                "利用 Hypervisor 保护内核代码（HVCI）。关闭后可释放 VT-x/AMD-V 给 VMware/VirtualBox 等虚拟机软件，需重启生效。\n" +
+                MemoryIntegrityStatusText;
+        }
+    }
+
+    private static bool ConfirmMemoryIntegrityChange(bool enable)
+    {
+        if (ProfileApplyContext.SuppressDangerConfirm)
+            return true;
+
+        if (enable)
+        {
+            var result = MessageBox.Show(
+                "开启后将独占 CPU 虚拟化资源，可能导致 VMware/VirtualBox 等虚拟机软件无法正常启动，需要重启生效。\n\n" +
+                "点击「是」确认开启，点击「否」取消。",
+                "确认开启内存完整性",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            return result == MessageBoxResult.Yes;
+        }
+        else
+        {
+            var result = MessageBox.Show(
+                "关闭后将降低系统内核防护能力，且需要重启生效。如果你正在使用 VMware/VirtualBox 等虚拟机软件，建议关闭。\n\n" +
+                "点击「是」确认关闭，点击「否」取消。",
+                "确认关闭内存完整性",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            return result == MessageBoxResult.Yes;
+        }
     }
 
     /// <summary>检查指定服务是否全部处于 Disabled 状态</summary>
@@ -409,6 +550,11 @@ public sealed class GeneralViewModel : ViewModelBase
 
     private void GenerateWslConfig()
     {
+        if (!LicenseGate.EnsureLicensed(out var deny))
+        {
+            _log.Error($"[授权] 已阻断 WSL 配置：{deny}");
+            return;
+        }
         try
         {
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

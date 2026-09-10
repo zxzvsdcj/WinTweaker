@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using WinTweaker.License;
 
 namespace WinTweaker.Services;
 
@@ -15,11 +16,20 @@ public sealed class RegistryService
 
     private RegistryService() { }
 
+    private bool EnsureLicensedWrite()
+    {
+        if (LicenseGate.EnsureLicensed(out var message))
+            return true;
+        _log.Error($"[授权] 已阻断写入：{message}");
+        return false;
+    }
+
     /// <summary>
     /// 设置 DWORD 值
     /// </summary>
     public bool SetDword(RegistryHive hive, string subKey, string valueName, int value)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
@@ -44,6 +54,7 @@ public sealed class RegistryService
     /// </summary>
     public bool SetString(RegistryHive hive, string subKey, string valueName, string value)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
@@ -105,6 +116,7 @@ public sealed class RegistryService
     /// </summary>
     public bool DeleteValue(RegistryHive hive, string subKey, string valueName)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
@@ -142,6 +154,7 @@ public sealed class RegistryService
     /// </summary>
     public bool SetDword(RegistryHive hive, string subKey, string valueName, int value, RegistryView view)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, view);
@@ -186,6 +199,7 @@ public sealed class RegistryService
     /// </summary>
     public bool DeleteValue(RegistryHive hive, string subKey, string valueName, RegistryView view)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, view);
@@ -223,6 +237,7 @@ public sealed class RegistryService
     /// </summary>
     public bool SetEmptyDefault(RegistryHive hive, string subKey)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
@@ -247,6 +262,7 @@ public sealed class RegistryService
     /// </summary>
     public bool DeleteSubKeyTree(RegistryHive hive, string subKey)
     {
+        if (!EnsureLicensedWrite()) return false;
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
