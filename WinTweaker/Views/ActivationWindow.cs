@@ -41,7 +41,7 @@ public partial class ActivationWindow : Window
 
         root.Children.Add(new TextBlock
         {
-            Text = "本机机器码（发给卖家录入）",
+            Text = "本机机器码（发给管理员录入）",
             FontSize = 12,
             Foreground = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99)),
             Margin = new Thickness(0, 0, 0, 6),

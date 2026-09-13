@@ -64,11 +64,33 @@
             <ui:Card>
                 <StackPanel>
                     <TextBlock Style="{StaticResource BodyText}" Text="1. 右键程序 →「以管理员身份运行」（首次会弹出 UAC 确认）。" />
-                    <TextBlock Style="{StaticResource BodyText}" Text="2. 若出现激活窗口：复制机器码发给作者微信 zxzvsdcj，完成授权后重启软件。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="2. 若出现激活窗口：复制机器码发给软件管理员（微信 zxzvsdcj），完成授权后重启软件。" />
                     <TextBlock Style="{StaticResource BodyText}" Text="3. 左侧导航选择功能页，打开开关即可应用；再次关闭开关即可回滚。" />
                     <TextBlock Style="{StaticResource BodyText}" Text="4. 部分项需重启资源管理器或注销/重启后生效（如内存完整性 HVCI），日志页会提示。" />
                     <TextBlock Style="{StaticResource MutedText}" Margin="0,8,0,0"
                                Text="提示：灰色不可用项表示当前系统版本不支持，属正常现象。" />
+                </StackPanel>
+            </ui:Card>
+
+            <TextBlock Style="{StaticResource SectionTitle}" Text="授权与激活" />
+            <ui:Card>
+                <StackPanel>
+                    <ui:InfoBar
+                        IsOpen="True"
+                        IsClosable="False"
+                        Severity="Informational"
+                        Title="角色说明"
+                        Message="本软件由管理员（开发者）在后台登记授权；您作为用户只需提供机器码并完成激活，无需自行修改任何配置文件。" />
+                    <TextBlock Style="{StaticResource BodyText}" Margin="0,10,0,0"
+                               Text="1. 首次启动若提示未激活：在激活窗口复制本机机器码。" />
+                    <TextBlock Style="{StaticResource BodyText}"
+                               Text="2. 将机器码发给软件管理员（微信 zxzvsdcj），等待完成授权登记。" />
+                    <TextBlock Style="{StaticResource BodyText}"
+                               Text="3. 授权完成后重启软件，即可使用核心优化功能。" />
+                    <TextBlock Style="{StaticResource BodyText}"
+                               Text="4. 未授权时核心功能不可用，属正常保护；请勿篡改安装目录下的授权相关文件。" />
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,8,0,0"
+                               Text="校验需可访问飞书 OpenAPI；断网时若在离线宽限期内且授权未到期，可继续使用。" />
                 </StackPanel>
             </ui:Card>
 
@@ -148,14 +170,16 @@
                     <TextBlock Style="{StaticResource BodyText}" Text="• 可用「复制全部」发给技术支持协助排查。" />
                     <TextBlock Style="{StaticResource BodyText}" Text="• 轻量版无法启动：安装 .NET 9 Desktop Runtime x64，或改用完整版。" />
                     <TextBlock Style="{StaticResource BodyText}" Text="• 功能灰色：当前系统不支持该项，无需处理。" />
-                    <TextBlock Style="{StaticResource BodyText}" Text="• 授权失败：核对机器码、网络，或联系微信 zxzvsdcj。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 授权失败：核对机器码是否完整、本机网络是否可用，或联系管理员微信 zxzvsdcj。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 提示已停用：设备可能被管理员停用，请联系管理员处理。" />
+                    <TextBlock Style="{StaticResource BodyText}" Text="• 提示已到期：请联系管理员续期后再启动。" />
                 </StackPanel>
             </ui:Card>
 
-            <TextBlock Style="{StaticResource SectionTitle}" Text="联系与定制" />
+            <TextBlock Style="{StaticResource SectionTitle}" Text="联系管理员与定制" />
             <ui:Card>
                 <StackPanel>
-                    <TextBlock Style="{StaticResource BodyText}" FontWeight="SemiBold" Text="作者微信：zxzvsdcj" />
+                    <TextBlock Style="{StaticResource BodyText}" FontWeight="SemiBold" Text="管理员微信：zxzvsdcj" />
                     <TextBlock Style="{StaticResource MutedText}"
                                Text="支持功能定制：可按企业/个人场景增减模块、调整默认开关、定制文案与交付包。请通过微信说明需求与系统环境。" />
                 </StackPanel>

@@ -137,7 +137,7 @@ public static class LicenseClient
             {
                 Status = "expired",
                 MachineCode = machineCode,
-                Message = "授权已到期，请联系卖家续期",
+                Message = "授权已到期，请联系管理员续期",
                 LicenseType = info.LicenseType,
                 ExpireTime = info.ExpireTime,
                 StartTime = info.StartTime,
@@ -152,7 +152,7 @@ public static class LicenseClient
             {
                 Status = "blacklisted",
                 MachineCode = machineCode,
-                Message = "该设备授权已被停用，请联系卖家处理",
+                Message = "该设备授权已被停用，请联系管理员处理",
             };
         }
 
@@ -161,7 +161,7 @@ public static class LicenseClient
         {
             Status = "not_activated",
             MachineCode = machineCode,
-            Message = "本机尚未激活，请将机器码发送给卖家完成授权",
+            Message = "本机尚未激活，请将机器码发送给管理员完成授权",
         };
     }
 

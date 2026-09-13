@@ -30,7 +30,7 @@ public static class LicenseGate
 
         var code = LastResult?.MachineCode ?? MachineCode.Generate();
         message = LastResult?.Message
-            ?? "本机尚未激活，请将机器码发送给卖家完成授权";
+            ?? "本机尚未激活，请将机器码发送给管理员完成授权";
         message = $"{message}\n机器码：{code}";
         return false;
     }
