@@ -90,6 +90,8 @@ Windows 10/11 全版本系统开发者优化工具，提供系统性能调优、
 copy WinTweaker\license_config.template.json WinTweaker\license_config.json
 ```
 
+该文件只作为构建输入。发布目录不应再出现它；Release 构建会把它编进 exe，并去掉 pdb。
+
 字段：`app_id` / `app_secret` / `bitable_token` / `table_id` / `product_code`（保持 `win-tweaker`）
 
 3. 启动应用，将激活页展示的机器码录入管理后台

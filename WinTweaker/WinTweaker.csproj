@@ -35,6 +35,8 @@
     <Platform>x64</Platform>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>false</PublishTrimmed>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,10 +51,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="license_config.json"
-          CopyToOutputDirectory="PreserveNewest"
-          Condition="Exists('license_config.json')" />
     <None Include="license_config.template.json" />
   </ItemGroup>
+
+  <Target Name="GenerateLicenseEmbed" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <Exec Command="python &quot;$(MSBuildProjectDirectory)\..\..\wu-guard-tauri\sdk\scripts\embed_license_config.py&quot; --lang csharp --namespace WinTweaker.License --default-product win-tweaker --config &quot;$(MSBuildProjectDirectory)\license_config.json&quot; --out &quot;$(IntermediateOutputPath)LicenseEmbedData.g.cs&quot;" />
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)LicenseEmbedData.g.cs" />
+    </ItemGroup>
+  </Target>
 
 </Project>

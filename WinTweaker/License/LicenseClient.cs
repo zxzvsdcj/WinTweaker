@@ -70,7 +70,7 @@ public static class LicenseClient
         }
         catch (Exception err)
         {
-            var verdict = LicenseCacheStore.OfflineVerify(machineCode);
+            var verdict = LicenseCacheStore.OfflineVerify(machineCode, cfg.CacheMaterial());
             if (verdict.Allowed)
             {
                 var rem = FeishuLicenseClient.RemainingDays(
@@ -115,7 +115,7 @@ public static class LicenseClient
         {
             var info = status.Info;
             LicenseCacheStore.Save(
-                machineCode, info.LicenseType, info.ExpireTime, info.StartTime, info.GrantDays);
+                machineCode, info.LicenseType, info.ExpireTime, info.StartTime, info.GrantDays, cfg.CacheMaterial());
             return new LicenseCheckResult
             {
                 Status = "activated",
@@ -132,7 +132,7 @@ public static class LicenseClient
         {
             var info = status.Info;
             LicenseCacheStore.Save(
-                machineCode, info.LicenseType, info.ExpireTime, info.StartTime, info.GrantDays);
+                machineCode, info.LicenseType, info.ExpireTime, info.StartTime, info.GrantDays, cfg.CacheMaterial());
             return new LicenseCheckResult
             {
                 Status = "expired",

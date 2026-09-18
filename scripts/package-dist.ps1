@@ -70,10 +70,16 @@ Customization: WeChat zxzvsdcj
     Set-Content -Path (Join-Path $dir "请先阅读.txt") -Value $readme -Encoding UTF8
 
     if (Test-Path $license) {
-        Copy-Item $license (Join-Path $dir "license_config.json") -Force
-        Write-Ok "$label includes license_config.json"
+        Write-Ok "build input license_config.json present (embedded at compile, not copied)"
     } else {
-        Write-Warn "$label missing license_config.json (seller must add it for activation)"
+        Write-Warn "license_config.json missing; published exe will have empty credentials"
+    }
+
+    Get-ChildItem $dir -Filter *.pdb -File -ErrorAction SilentlyContinue | Remove-Item -Force
+    $leaked = Join-Path $dir "license_config.json"
+    if (Test-Path $leaked) { throw "$label must not ship license_config.json" }
+    if (Get-ChildItem $dir -Filter *.pdb -File -ErrorAction SilentlyContinue) {
+        throw "$label must not ship pdb"
     }
 
     $exe = Join-Path $dir "WinTweaker.exe"

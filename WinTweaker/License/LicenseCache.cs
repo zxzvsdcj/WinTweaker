@@ -6,8 +6,9 @@ using System.Text.Json;
 namespace WinTweaker.License;
 
 /// <summary>
-/// 离线授权缓存：AES-256-GCM，密钥派生与路径对齐 Python/Rust SDK。
-/// 路径：%APPDATA%/WuGuard/license.dat，宽限 7 天。
+/// 离线授权缓存：AES-256-GCM。密钥 = SHA256("wuguard-license-cache-v2|" + 内嵌材料 + "|" + 机器码)，
+/// 正文另带 HMAC-SHA256。只知道机器码无法伪造。路径：%APPDATA%/WuGuard/license.dat，宽限 7 天。
+/// 升级后旧缓存无法解密，需再成功在线验证一次。
 /// </summary>
 public static class LicenseCacheStore
 {
@@ -22,6 +23,7 @@ public static class LicenseCacheStore
         public long ExpireTime { get; set; }
         public long StartTime { get; set; }
         public long GrantDays { get; set; }
+        public string Mac { get; set; } = "";
     }
 
     public sealed class OfflineVerdict
@@ -34,6 +36,9 @@ public static class LicenseCacheStore
 
     public static string CachePath()
     {
+        var overridePath = Environment.GetEnvironmentVariable("WUGUARD_LICENSE_CACHE");
+        if (!string.IsNullOrWhiteSpace(overridePath))
+            return overridePath;
         var baseDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         if (string.IsNullOrEmpty(baseDir))
             baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
@@ -42,10 +47,25 @@ public static class LicenseCacheStore
         return Path.Combine(directory, "license.dat");
     }
 
-    private static byte[] DeriveKey(string machineCode)
+    private static byte[] DeriveKey(string material, string machineCode)
     {
-        var seed = Encoding.UTF8.GetBytes($"wuguard-license-cache|{machineCode}");
+        var seed = Encoding.UTF8.GetBytes($"wuguard-license-cache-v2|{material}|{machineCode}");
         return SHA256.HashData(seed);
+    }
+
+    private static byte[] MacKey(string material)
+    {
+        var seed = Encoding.UTF8.GetBytes($"wuguard-license-mac-v2|{material}");
+        return SHA256.HashData(seed);
+    }
+
+    private static string Canonical(LicenseCache cache)
+        => $"v2|{cache.MachineCode}|{cache.VerifiedAt}|{cache.LicenseType}|{cache.ExpireTime}|{cache.StartTime}|{cache.GrantDays}";
+
+    private static string ComputeMac(string material, string canonical)
+    {
+        using var hmac = new HMACSHA256(MacKey(material));
+        return Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(canonical))).ToLowerInvariant();
     }
 
     public static void Save(
@@ -53,19 +73,32 @@ public static class LicenseCacheStore
         string licenseType,
         long expireTime,
         long startTime,
-        long grantDays)
+        long grantDays,
+        string material)
     {
+        var verifiedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var cache = new LicenseCache
+        {
+            MachineCode = machineCode,
+            VerifiedAt = verifiedAt,
+            LicenseType = licenseType,
+            ExpireTime = expireTime,
+            StartTime = startTime,
+            GrantDays = grantDays,
+        };
+        cache.Mac = ComputeMac(material, Canonical(cache));
         var payload = new Dictionary<string, object?>
         {
-            ["machine_code"] = machineCode,
-            ["verified_at"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            ["license_type"] = licenseType,
-            ["expire_time"] = expireTime,
-            ["start_time"] = startTime,
-            ["grant_days"] = grantDays,
+            ["machine_code"] = cache.MachineCode,
+            ["verified_at"] = cache.VerifiedAt,
+            ["license_type"] = cache.LicenseType,
+            ["expire_time"] = cache.ExpireTime,
+            ["start_time"] = cache.StartTime,
+            ["grant_days"] = cache.GrantDays,
+            ["mac"] = cache.Mac,
         };
         var plaintext = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload));
-        var key = DeriveKey(machineCode);
+        var key = DeriveKey(material, machineCode);
         var nonce = RandomNumberGenerator.GetBytes(12);
         var ciphertext = new byte[plaintext.Length];
         var tag = new byte[16];
@@ -78,10 +111,14 @@ public static class LicenseCacheStore
         Buffer.BlockCopy(nonce, 0, blob, 0, nonce.Length);
         Buffer.BlockCopy(ciphertext, 0, blob, nonce.Length, ciphertext.Length);
         Buffer.BlockCopy(tag, 0, blob, nonce.Length + ciphertext.Length, tag.Length);
-        File.WriteAllBytes(CachePath(), blob);
+        var path = CachePath();
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir))
+            Directory.CreateDirectory(dir);
+        File.WriteAllBytes(path, blob);
     }
 
-    public static LicenseCache? Read(string machineCode)
+    public static LicenseCache? Read(string machineCode, string material)
     {
         var path = CachePath();
         if (!File.Exists(path))
@@ -93,7 +130,7 @@ public static class LicenseCacheStore
 
         try
         {
-            var key = DeriveKey(machineCode);
+            var key = DeriveKey(material, machineCode);
             var nonce = data.AsSpan(0, 12);
             var tag = data.AsSpan(data.Length - 16, 16);
             var ciphertext = data.AsSpan(12, data.Length - 12 - 16);
@@ -109,7 +146,11 @@ public static class LicenseCacheStore
             if (cachedCode != machineCode)
                 return null;
 
-            return new LicenseCache
+            var mac = root.TryGetProperty("mac", out var macEl) ? (macEl.GetString() ?? "") : "";
+            if (string.IsNullOrEmpty(mac))
+                return null;
+
+            var parsed = new LicenseCache
             {
                 MachineCode = cachedCode,
                 VerifiedAt = root.TryGetProperty("verified_at", out var va) ? va.GetInt64() : 0,
@@ -119,7 +160,14 @@ public static class LicenseCacheStore
                 ExpireTime = root.TryGetProperty("expire_time", out var et) ? et.GetInt64() : 0,
                 StartTime = root.TryGetProperty("start_time", out var st) ? st.GetInt64() : 0,
                 GrantDays = root.TryGetProperty("grant_days", out var gd) ? gd.GetInt64() : 0,
+                Mac = mac,
             };
+            var expect = ComputeMac(material, Canonical(parsed));
+            var left = Encoding.UTF8.GetBytes(mac);
+            var right = Encoding.UTF8.GetBytes(expect);
+            if (!CryptographicOperations.FixedTimeEquals(left, right))
+                return null;
+            return parsed;
         }
         catch
         {
@@ -141,10 +189,10 @@ public static class LicenseCacheStore
         }
     }
 
-    public static OfflineVerdict OfflineVerify(string machineCode)
+    public static OfflineVerdict OfflineVerify(string machineCode, string material)
     {
         var empty = new LicenseCache { MachineCode = machineCode, VerifiedAt = 0 };
-        var cache = Read(machineCode);
+        var cache = Read(machineCode, material);
         if (cache is null)
             return new OfflineVerdict { Allowed = false, GraceDaysLeft = 0, Cache = empty, Reason = "invalid" };
 
